@@ -4,13 +4,30 @@ import { AppService } from "./app.service";
 import { ConfigModule } from "@nestjs/config";
 import configuration from "@common";
 import * as Joi from 'joi';
+import {config} from 'dotenv';
 import { MongooseModule } from "@nestjs/mongoose";
+import { AdminModule } from "@admin/admin.module";
+import { ThrottlerModule } from "@nestjs/throttler";
+
+/// load env files and get database string
+config();
+const databaseUrl = process.env.MONGO_URI;
 
 @Module({
   imports: [
+    /// other modules
+    AdminModule,
+
+    /// prevent brute force attack
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10,
+    }),
+
+    /// configurations
     ConfigModule.forRoot({
       load: [configuration],
-      envFilePath: [".env.local", ".env.production"],
+      // envFilePath: [".env", ".env.production"],
       isGlobal: true,
       cache: true,
       expandVariables: true,
@@ -26,7 +43,7 @@ import { MongooseModule } from "@nestjs/mongoose";
       },
     }),
     // connect to mongodb database
-    MongooseModule.forRoot("mongodb://localhost/dynasty", {
+    MongooseModule.forRoot(databaseUrl, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     }),
