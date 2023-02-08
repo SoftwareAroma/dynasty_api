@@ -20,6 +20,8 @@
     "paths": {
       "@app/*": ["src/app/*"],
       "@app": ["src/app"],
+      "@common": ["src/common"],
+      "@common/*": ["src/common/*"],
     }
   }
 }
