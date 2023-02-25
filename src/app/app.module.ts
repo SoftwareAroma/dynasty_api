@@ -1,22 +1,28 @@
-import { Module } from "@nestjs/common";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
-import { ConfigModule } from "@nestjs/config";
-import configuration from "@common";
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import configuration from '@common';
 import * as Joi from 'joi';
-import {config} from 'dotenv';
-import { MongooseModule } from "@nestjs/mongoose";
-import { AdminModule } from "@admin/admin.module";
-import { ThrottlerModule } from "@nestjs/throttler";
-
-/// load env files and get database string
-config();
-const databaseUrl = process.env.MONGO_URI;
+import { AdminModule } from '@admin/admin.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { CustomerModule } from '@customer/customer.module';
+import { ProductModule } from '@product/product.module';
+import { PrismaModule } from '@prisma/prisma.module';
+import { CloudinaryModule } from '@cloudinary/cloudinary.module';
+import { JwtStrategy } from '@common/strategy/jwt.strategy';
 
 @Module({
   imports: [
     /// other modules
     AdminModule,
+    CustomerModule,
+    ProductModule,
+
+    // prisma for database query and connection
+    PrismaModule,
+    //Cloudinary Module for file upload and retrieval
+    CloudinaryModule,
 
     /// prevent brute force attack
     ThrottlerModule.forRoot({
@@ -27,7 +33,6 @@ const databaseUrl = process.env.MONGO_URI;
     /// configurations
     ConfigModule.forRoot({
       load: [configuration],
-      // envFilePath: [".env", ".env.production"],
       isGlobal: true,
       cache: true,
       expandVariables: true,
@@ -42,13 +47,8 @@ const databaseUrl = process.env.MONGO_URI;
         abortEarly: true,
       },
     }),
-    // connect to mongodb database
-    MongooseModule.forRoot(databaseUrl, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtStrategy],
 })
 export class AppModule {}

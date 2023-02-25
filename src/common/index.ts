@@ -1,10 +1,22 @@
-export { default } from "./config/configuration";
+export { default } from './config/configuration';
 export {
   hashPassword,
   comparePassword,
   generateSalt,
+  // storage,
 } from './functions/common.function';
 
-export {Roles, DefaultActions} from './enums';
-export {FacebookAuthGuard, GoogleAuthGuard, JwtAuthGuard} from './guards';
-export {jwtConstants} from './constants';
+export { Role, Actions } from './enums';
+
+export { FacebookAuthGuard, GoogleAuthGuard, JwtAuthGuard } from './guards';
+
+export { jwtConstants, PriceType } from './constants';
+
+export {
+  Roles,
+  ROLES_KEY,
+  CheckPolicies,
+  CHECK_POLICIES_KEY,
+} from './decorators';
+
+// export { JwtStrategy } from './strategy';

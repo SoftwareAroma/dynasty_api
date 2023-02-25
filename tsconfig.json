@@ -25,6 +25,18 @@
       "@common/*": ["src/common/*"],
       "@admin/*": ["src/admin/*"],
       "@admin": ["src/admin"],
+      "@customer": ["src/customer"],
+      "@customer/*": ["src/customer/*"],
+      "@product/*": ["src/product/*"],
+      "@product": ["src/product"],
+      "@casl": ["src/casl"],
+      "@casl/*": ["src/casl/*"],
+      "@prisma/*": ["src/prisma/*"],
+      "@prisma": ["src/prisma"],
+      "@filter": ["src/exception"],
+      "@filter/*": ["src/exception/*"],
+      "@cloudinary": ["src/cloudinary"],
+      "@cloudinary/*": ["src/cloudinary/*"],
     }
   }
 }

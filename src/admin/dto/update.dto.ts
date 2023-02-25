@@ -1,11 +1,4 @@
-export class UpdateAdminDto {
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  displayName?: string;
-  phone?: string;
-  avatar?: string;
-  password?: string;
-  salt?: string;
+import { PartialType } from '@nestjs/swagger';
+import { CreateAdminDto } from '@admin/dto/create.dto';
 
-}
+export class UpdateAdminDto extends PartialType(CreateAdminDto) {}

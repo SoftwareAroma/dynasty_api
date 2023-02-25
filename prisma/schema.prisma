@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id          String   @id @unique @default(uuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  displayName String?
+  phone       String?
+  avatar      String?  @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")
+  salt        String?
+  role        Role     @default(ADMIN)
+  isAdmin     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
+}
+
+model Customer {
+  id          String   @id @unique @default(uuid())
+  social      String?
+  email       String   @unique
+  password    String?
+  firstName   String
+  lastName    String
+  displayName String
+  phone       String
+  salt        String?
+  avatar      String?  @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")
+  role        Role     @default(USER)
+  isAdmin     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
+}
+
+model Product {
+  id          String   @id @unique @default(uuid())
+  name        String
+  description String
+  price       Json
+  images      String[]
+  class       String
+  category    String
+  brand       String?  @default("Custom")
+  rating      Int?     @default(0)
+  numReviews  Int?     @default(0)
+  numInStock  Int?     @default(0)
+  colors      String[] @default([])
+  sizes       String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
+}
+
+enum Role {
+  USER
+  ADMIN
+}
