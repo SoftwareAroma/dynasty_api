@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '@common';
-import * as Joi from 'joi';
 import { AdminModule } from '@admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
@@ -11,6 +10,7 @@ import { ProductModule } from '@product/product.module';
 import { PrismaModule } from '@prisma/prisma.module';
 import { CloudinaryModule } from '@cloudinary/cloudinary.module';
 import { JwtStrategy } from '@common/strategy/jwt.strategy';
+import * as Joi from 'joi';
 
 @Module({
   imports: [

@@ -37,6 +37,8 @@
       "@filter/*": ["src/exception/*"],
       "@cloudinary": ["src/cloudinary"],
       "@cloudinary/*": ["src/cloudinary/*"],
+      "@payment": ["src/payment"],
+      "@payment/*": ["src/payment/*"],
     }
   }
 }

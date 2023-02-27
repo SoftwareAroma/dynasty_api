@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: dynasty-k8s
+spec:
+  selector:
+    matchLabels:
+      app: dynasty-k8s
+    replicas: 2
+    template:
+      metadata:
+        labels:
+          app: dynasty-k8s
+      spec:
+        containers:
+          - name: dynasty-k8s
+            image: musahibrahimali/dynasty-api
+            ports:
+              - containerPort: 5000

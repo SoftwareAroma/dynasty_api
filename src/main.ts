@@ -15,7 +15,7 @@ import { PrismaClientExceptionFilter } from '@filter/exception.filter';
  * ############### BOOTSTRAP THE APP ####################
  * ######################################################
  * */
-async function bootstrap() {
+const bootstrap = async () => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // 'log' // remove log to disable logging
   });
@@ -27,6 +27,9 @@ async function bootstrap() {
   const origin = configService.get<string>('FRONTEND_URL');
   // api version
   const apiVersion = configService.get<string>('API_VERSION');
+  const swaggerPath = 'swagger';
+  // global prefix
+  app.setGlobalPrefix('api');
   // enable CORS
   app.enableCors({
     origin: origin,
@@ -87,7 +90,8 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // path for swagger
+  SwaggerModule.setup(`${swaggerPath}`, app, document);
 
   // exception handling
   const { httpAdapter } = app.get(HttpAdapterHost);
@@ -99,13 +103,15 @@ async function bootstrap() {
     .listen(port)
     .then(() => {
       console.log(`Server running on port http://localhost:${port}`);
-      console.log(`Swagger running on port http://localhost:${port}/api`);
+      console.log(
+        `Swagger running on port http://localhost:${port}/${swaggerPath}`,
+      );
       console.log('Press CTRL-C to stop server');
     })
     .catch((err) => {
       console.log('There was an error starting server. ', err);
     });
-}
+};
 
 /// start the app
 bootstrap().then(() => console.log());
