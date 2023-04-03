@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Attendance" ALTER COLUMN "startTime" SET DATA TYPE TEXT,
+ALTER COLUMN "closeTime" SET DATA TYPE TEXT;

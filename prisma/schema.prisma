@@ -46,7 +46,7 @@ model Product {
   description String
   price       Json
   images      String[]
-  class       String
+  depo        String
   category    String
   brand       String?  @default("Custom")
   rating      Int?     @default(0)
@@ -56,6 +56,29 @@ model Product {
   sizes       String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt()
+}
+
+model Employee {
+  id          String       @id @unique @default(uuid())
+  firstName   String
+  lastName    String
+  phoneNumber String
+  designation String
+  avatar      String?      @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")
+  email       String?      @unique
+  attendance  Attendance[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt()
+}
+
+model Attendance {
+  id         String   @id @unique @default(uuid())
+  startTime  String
+  closeTime  String?
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
 }
 
 enum Role {

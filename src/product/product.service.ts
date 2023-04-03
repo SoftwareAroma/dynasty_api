@@ -37,7 +37,11 @@ export class ProductService {
 
   /// get all products
   async getProducts(): Promise<Array<ProductModel>> {
-    return this.prismaService.product.findMany();
+    const _products = await this.prismaService.product.findMany();
+    if(_products == null){
+      return undefined;
+    }
+    return _products;
   }
 
   /// get product by id

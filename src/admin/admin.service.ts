@@ -19,7 +19,7 @@ export class AdminService {
   /// create an admin
   async register(createAdminDto: CreateAdminDto): Promise<string> {
     const response = await this.createAdmin(createAdminDto);
-    if (response.id) {
+    if (response != undefined) {
       // generate a token
       const payload = { sub: response.id, username: response.email };
       return this.jwtService.sign(payload);
@@ -40,7 +40,7 @@ export class AdminService {
       loginAdminDto.email,
       loginAdminDto.password,
     );
-    if (admin === undefined) {
+    if (admin == undefined) {
       return undefined;
     }
     return admin;
@@ -49,6 +49,9 @@ export class AdminService {
   // get all customers
   async getAdmins(): Promise<AdminModel[]> {
     const _admins = await this.prismaService.admin.findMany();
+    if(_admins == null){
+      return undefined
+    }
     _admins.forEach((_admin) => this.exclude(_admin, ['password', 'salt']));
     return _admins;
   }
@@ -56,7 +59,7 @@ export class AdminService {
   // get user profile
   async getProfile(id: string): Promise<AdminModel> {
     const client = await this.getAdminProfile(id);
-    if (client === undefined) {
+    if (client == undefined) {
       return undefined;
     }
     return client;
@@ -142,10 +145,7 @@ export class AdminService {
       where: { email: createAdminDto.email },
     });
     if (emailExists) {
-      return {
-        status: 'error',
-        message: 'Email already exists',
-      };
+      return undefined;
     }
     if (createAdminDto.displayName == null) {
       createAdminDto.displayName = `${createAdminDto.firstName} ${createAdminDto.lastName}`;

@@ -60,6 +60,9 @@ export class CustomerService {
   // get all customers
   async getCustomers(): Promise<CustomerModel[]> {
     const _customers = await this.prismaService.customer.findMany();
+    if(_customers == null){
+      return undefined
+    }
     _customers.forEach((_customer) =>
       this.exclude(_customer, ['password', 'salt']),
     );

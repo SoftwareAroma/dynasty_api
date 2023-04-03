@@ -13,7 +13,7 @@ import {
 import { ProductService } from '@product/product.service';
 import { Product } from '@prisma/client';
 import { CreateProductDto } from '@product/dto/create.dto';
-import { CheckPolicies, JwtAuthGuard } from '@common';
+import { CheckPolicies, JwtAuthGuard, PriceType } from '@common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateProductDto } from '@product/dto/update.dto';
 import { PoliciesGuard } from '@common/guards/policies.guard';
@@ -37,6 +37,8 @@ export class ProductController {
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<Product | any> {
+    console.log(`create dto - ${files.length}`);
+
     const _productDto = createProductDto;
     // convert price string to json object
     _productDto.price = JSON.parse(_productDto.price.toString());

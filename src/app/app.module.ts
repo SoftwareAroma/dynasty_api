@@ -11,6 +11,8 @@ import { PrismaModule } from '@prisma/prisma.module';
 import { CloudinaryModule } from '@cloudinary/cloudinary.module';
 import { JwtStrategy } from '@common/strategy/jwt.strategy';
 import * as Joi from 'joi';
+import { EmployeeModule } from '@employee/employee.module';
+import { PaymentModule } from '@payment/payment.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import * as Joi from 'joi';
     AdminModule,
     CustomerModule,
     ProductModule,
+    EmployeeModule,
+    PaymentModule,
 
     // prisma for database query and connection
     PrismaModule,

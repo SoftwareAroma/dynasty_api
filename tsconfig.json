@@ -39,6 +39,8 @@
       "@cloudinary/*": ["src/cloudinary/*"],
       "@payment": ["src/payment"],
       "@payment/*": ["src/payment/*"],
+      "@employee": ["src/employee"],
+      "@employee/*": ["src/employee/*"],
     }
   }
 }

@@ -1,2 +1,2 @@
 export { jwtConstants } from './jwt.constants';
-export { PriceType, CLOUDINARY } from './constants';
+export { PriceType, CLOUDINARY, AttendanceType } from './constants';

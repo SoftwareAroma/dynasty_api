@@ -4,7 +4,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import csurf from 'csurf';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PrismaService } from '@prisma/prisma.service';
@@ -51,19 +50,6 @@ const bootstrap = async () => {
       crossOriginEmbedderPolicy: false,
     }),
   );
-  /*
-   * ########################################################
-   * ######## PREVENT XSS ATTACKS AND SQL INJECTION #########
-   * ########################################################
-   * */
-  // app.use(
-  //   csurf({
-  //     cookie: {
-  //       sameSite: true,
-  //       secure: true,
-  //     },
-  //   }),
-  // );
 
   /*
    * ###########################################################
@@ -102,7 +88,7 @@ const bootstrap = async () => {
   await app
     .listen(port)
     .then(() => {
-      console.log(`Server running on port http://localhost:${port}`);
+      console.log(`Server running on port http://localhost:${port}/api`);
       console.log(
         `Swagger running on port http://localhost:${port}/${swaggerPath}`,
       );

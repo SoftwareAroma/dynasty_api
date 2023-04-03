@@ -9,7 +9,6 @@ import {
   Req,
   Res,
   UploadedFile,
-  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -43,6 +42,9 @@ export class AdminController {
   ): Promise<{ access_token: string }> {
     const domain = this.configService.get<string>('DOMAIN');
     const token = await this.adminService.register(createAdminDto);
+    if (token == undefined) {
+      return null;
+    }
     response.cookie('access_token', token, {
       domain: domain,
       httpOnly: true,
@@ -57,6 +59,9 @@ export class AdminController {
   ): Promise<{ access_token: string }> {
     const token = await this.adminService.loginAdmin(loginAdminDto);
     const domain = this.configService.get<string>('DOMAIN');
+    if (token == undefined) {
+      return null;
+    }
     response.cookie('access_token', token, {
       domain: domain,
       httpOnly: true,

@@ -33,7 +33,7 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  class: string;
+  depo: string;
 
   @IsString()
   @IsOptional()

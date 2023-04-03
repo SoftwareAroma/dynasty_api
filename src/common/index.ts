@@ -10,7 +10,7 @@ export { Role, Actions } from './enums';
 
 export { FacebookAuthGuard, GoogleAuthGuard, JwtAuthGuard } from './guards';
 
-export { jwtConstants, PriceType } from './constants';
+export { jwtConstants, PriceType, AttendanceType } from './constants';
 
 export {
   Roles,

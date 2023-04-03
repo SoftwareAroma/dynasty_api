@@ -63,3 +63,16 @@ export class DeleteAdminPolicyHandler implements IPolicyHandler {
     return ability.can(Actions.Delete, 'AdminModel');
   }
 }
+
+// Employee
+export class CreateEmployeePolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Actions.Create, 'EmployeeModel');
+  }
+}
+
+export class DeleteEmployeePolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Actions.Delete, 'EmployeeModel');
+  }
+}

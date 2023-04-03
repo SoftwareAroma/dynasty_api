@@ -6,6 +6,7 @@ import {
   Admin as AdminModel,
   Customer as CustomerModel,
   Product as ProductModel,
+  Employee as EmployeeModel,
 } from '@prisma/client';
 import { createPrismaAbility, PrismaQuery, Subjects } from '@casl/prisma';
 
@@ -18,6 +19,7 @@ export type AppAbility = PureAbility<
           CustomerModel: CustomerModel;
           AdminModel: AdminModel;
           ProductModel: ProductModel;
+          EmployeeModel: EmployeeModel;
         }>
     ),
   ],
@@ -39,6 +41,7 @@ export class CaslAbilityFactory {
       cannot(Actions.Create, 'ProductModel');
       cannot(Actions.Update, 'ProductModel');
       cannot(Actions.Delete, 'ProductModel');
+      cannot(Actions.Manage, 'EmployeeModel');
     } else {
       can(Actions.Manage, 'all');
     }

@@ -3,4 +3,10 @@ export type PriceType = {
   currency: string;
 };
 
+export type AttendanceType = {
+  startTime: Date;
+  closeTime: Date;
+  employeeId: string;
+};
+
 export const CLOUDINARY = 'Cloudinary';
