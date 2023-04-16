@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import configuration, { AllExceptionFilter, HttpExceptionFilter } from '@common';
+import configuration, { AllExceptionFilter } from '@common';
 import { AdminModule } from '@admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
