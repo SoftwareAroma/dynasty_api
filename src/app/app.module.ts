@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import configuration from '@common';
+import configuration, { AllExceptionFilter, HttpExceptionFilter } from '@common';
 import { AdminModule } from '@admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
@@ -13,6 +13,7 @@ import { JwtStrategy } from '@common/strategy/jwt.strategy';
 import * as Joi from 'joi';
 import { EmployeeModule } from '@employee/employee.module';
 import { PaymentModule } from '@payment/payment.module';
+import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -53,6 +54,13 @@ import { PaymentModule } from '@payment/payment.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, JwtStrategy],
+  providers: [
+    AppService,
+    JwtStrategy,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionFilter,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule { }

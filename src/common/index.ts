@@ -19,4 +19,5 @@ export {
   CHECK_POLICIES_KEY,
 } from './decorators';
 
-// export { JwtStrategy } from './strategy';
+export { HttpExceptionFilter } from './config/http-exception.filter';
+export { AllExceptionFilter } from './config/all-exception.filter';

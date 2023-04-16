@@ -8,6 +8,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PrismaService } from '@prisma/prisma.service';
 import { PrismaClientExceptionFilter } from '@filter/exception.filter';
+import { AllExceptionFilter } from '@common';
 
 /*
  * ######################################################
@@ -82,6 +83,7 @@ const bootstrap = async () => {
   // exception handling
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+  app.useGlobalFilters(new AllExceptionFilter(app.get(HttpAdapterHost)));
 
   // get the port from the config file
   const port = configService.get<number>('PORT');
