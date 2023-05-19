@@ -14,7 +14,7 @@ export class AdminService {
     private prismaService: PrismaService,
     private readonly jwtService: JwtService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   /// create an admin
   async register(createAdminDto: CreateAdminDto): Promise<string> {
@@ -49,7 +49,7 @@ export class AdminService {
   // get all customers
   async getAdmins(): Promise<AdminModel[]> {
     const _admins = await this.prismaService.admin.findMany();
-    if(_admins == null){
+    if (_admins == null) {
       return undefined
     }
     _admins.forEach((_admin) => this.exclude(_admin, ['password', 'salt']));
@@ -77,7 +77,7 @@ export class AdminService {
   async updateAvatar(id: string, file: Express.Multer.File): Promise<boolean> {
     const _uploadFile = await this.cloudinaryService.uploadFile(
       file,
-      'admin_avatar',
+      'dynasty/admin/avatar',
       `${file.originalname?.split('.')[0]}`,
     );
 

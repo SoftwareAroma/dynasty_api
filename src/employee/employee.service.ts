@@ -15,7 +15,7 @@ export class EmployeeService {
     private readonly configService: ConfigService,
     private prismaService: PrismaService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   async createEmployee(
     employeeDto: CreateEmployeeDto,
@@ -37,7 +37,7 @@ export class EmployeeService {
   ): Promise<boolean> {
     const _uploadFile = await this.cloudinaryService.uploadFile(
       file,
-      'employee_avatar',
+      'dynasty/customer/avatar',
       `${file.originalname?.split('.')[0]}`,
     );
     const _customer = await this.prismaService.customer.update({
@@ -150,7 +150,7 @@ export class EmployeeService {
         employee: true,
       },
     });
-    if(_attendance == null){
+    if (_attendance == null) {
       return undefined
     }
     return _attendance;

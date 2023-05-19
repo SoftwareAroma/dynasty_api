@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Product as ProductModel } from '@prisma/client';
 import { PrismaService } from '@prisma/prisma.service';
 import { CreateProductDto } from '@product/dto/create.dto';
@@ -10,9 +9,8 @@ import { UpdateProductDto } from '@product/dto/update.dto';
 export class ProductService {
   constructor(
     private prismaService: PrismaService,
-    private readonly configService: ConfigService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   // create product
   async createProduct(
@@ -23,7 +21,7 @@ export class ProductService {
     for (const image of files) {
       const _fileUrl = await this.cloudinaryService.uploadFile(
         image,
-        'products',
+        'dynasty/products',
         `${image.originalname?.split('.')[0]}`,
       );
       _images.push(_fileUrl);
@@ -38,7 +36,7 @@ export class ProductService {
   /// get all products
   async getProducts(): Promise<Array<ProductModel>> {
     const _products = await this.prismaService.product.findMany();
-    if(_products == null){
+    if (_products == null) {
       return undefined;
     }
     return _products;
@@ -72,7 +70,7 @@ export class ProductService {
     for (const image of files) {
       const _fileUrl = await this.cloudinaryService.uploadFile(
         image,
-        'products',
+        'dynasty/products',
         `${image.originalname?.split('.')[0]}`,
       );
       _images.push(_fileUrl);

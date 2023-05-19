@@ -14,7 +14,7 @@ export class CustomerService {
     private prismaService: PrismaService,
     private readonly jwtService: JwtService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   /// create a customer
   async register(createCustomerDto: CreateCustomerDto): Promise<string> {
@@ -60,7 +60,7 @@ export class CustomerService {
   // get all customers
   async getCustomers(): Promise<CustomerModel[]> {
     const _customers = await this.prismaService.customer.findMany();
-    if(_customers == null){
+    if (_customers == null) {
       return undefined
     }
     _customers.forEach((_customer) =>
@@ -81,7 +81,7 @@ export class CustomerService {
   async updateAvatar(id: string, file: Express.Multer.File): Promise<boolean> {
     const _uploadFile = await this.cloudinaryService.uploadFile(
       file,
-      'customer_avatar',
+      'dynasty/customer/avatar',
       `${file.originalname?.split('.')[0]}`,
     );
     const _customer = await this.prismaService.customer.update({
