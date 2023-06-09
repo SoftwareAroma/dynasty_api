@@ -10,13 +10,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ProductService } from '@product/product.service';
-import { Product } from '@prisma/client';
-import { CreateProductDto } from '@product/dto/create.dto';
-import { CheckPolicies, JwtAuthGuard, PriceType } from '@common';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { UpdateProductDto } from '@product/dto/update.dto';
-import { PoliciesGuard } from '@common/guards/policies.guard';
+import {ProductService} from '@product/product.service';
+import {Product} from '@prisma/client';
+import {CreateProductDto} from '@product/dto/create.dto';
+import {CheckPolicies, JwtAuthGuard} from '@common';
+import {FilesInterceptor} from '@nestjs/platform-express';
+import {UpdateProductDto} from '@product/dto/update.dto';
+import {PoliciesGuard} from '@common/guards/policies.guard';
 import {
   CreateProductPolicyHandler,
   DeleteProductPolicyHandler,
@@ -37,12 +37,18 @@ export class ProductController {
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<Product | any> {
-    console.log(`create dto - ${files.length}`);
+    // console.log(`create dto - ${createProductDto.price}`);
+    // console.log(`create dto - ${files.length}`);
 
     const _productDto = createProductDto;
     // convert price string to json object
     _productDto.price = JSON.parse(_productDto.price.toString());
-    return this.productService.createProduct(_productDto, files);
+    _productDto.numInStock = parseInt(_productDto.numInStock ? _productDto.numInStock.toString() : "0", 10);
+    _productDto.numReviews = parseInt(_productDto.numReviews != null ? _productDto.numReviews.toString() : "0", 10);
+    _productDto.rating = parseInt(_productDto.rating != null ? _productDto.rating?.toString() : "0", 10);
+
+    // console.log(`create dto - ${_productDto.price.amount}`);
+    return await this.productService.createProduct(_productDto, files);
   }
 
   // get all products
@@ -66,6 +72,7 @@ export class ProductController {
   // update product
   @UseGuards(PoliciesGuard)
   @CheckPolicies(new UpdateProductPolicyHandler())
+  @UseInterceptors(FilesInterceptor('images'))
   @UseGuards(JwtAuthGuard)
   @Patch('product/:id')
   async updateProduct(
@@ -73,7 +80,13 @@ export class ProductController {
     @Param('id') id: string,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<Product> {
-    return await this.productService.updateProduct(id, updateProductDto, files);
+      const _productDto = updateProductDto;
+      // convert price string to json object
+      _productDto.price = JSON.parse(_productDto.price.toString());
+      _productDto.numInStock = parseInt(_productDto.numInStock ? _productDto.numInStock.toString() : "0", 10);
+      _productDto.numReviews = parseInt(_productDto.numReviews != null ? _productDto.numReviews.toString() : "0", 10);
+      _productDto.rating = parseInt(_productDto.rating != null ? _productDto.rating?.toString() : "0", 10);
+    return await this.productService.updateProduct(id, _productDto, files);
   }
 
   // delete product image

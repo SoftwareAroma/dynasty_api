@@ -16,7 +16,10 @@ import { CaslModule } from '@casl/casl.module';
     }),
   ],
   controllers: [CustomerController],
-  providers: [CustomerService],
+  providers: [
+      CustomerService,
+      // CustomerJwtStrategy,
+  ],
   exports: [CustomerService],
 })
 export class CustomerModule {}

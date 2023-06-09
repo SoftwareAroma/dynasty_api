@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { Product as ProductModel } from '@prisma/client';
-import { PrismaService } from '@prisma/prisma.service';
-import { CreateProductDto } from '@product/dto/create.dto';
-import { CloudinaryService } from '@cloudinary/cloudinary.service';
-import { UpdateProductDto } from '@product/dto/update.dto';
+import {Injectable} from '@nestjs/common';
+import {Product as ProductModel} from '@prisma/client';
+import {PrismaService} from '@prisma/prisma.service';
+import {CreateProductDto} from '@product/dto/create.dto';
+import {CloudinaryService} from '@cloudinary/cloudinary.service';
+import {UpdateProductDto} from '@product/dto/update.dto';
 
 @Injectable()
 export class ProductService {
@@ -17,17 +17,22 @@ export class ProductService {
     createProductDto: CreateProductDto,
     files: Array<Express.Multer.File>,
   ): Promise<ProductModel | any> {
-    const _images = [];
-    for (const image of files) {
-      const _fileUrl = await this.cloudinaryService.uploadFile(
-        image,
-        'dynasty/products',
-        `${image.originalname?.split('.')[0]}`,
-      );
-      _images.push(_fileUrl);
+    if(files.length > 0){
+      const _images = [];
+      for (const image of files) {
+        // console.log("data ", files);
+        const _fileUrl = await this.cloudinaryService.uploadFile(
+            image,
+            'dynasty/products',
+            `${image.originalname?.split('.')[0]}`,
+        );
+        _images.push(_fileUrl);
+      }
+      createProductDto.images = _images;
     }
-    createProductDto.images = _images;
     createProductDto.price.amount = Number(createProductDto.price.amount);
+    // console.log("Product >>>>", createProductDto.images);
+    // console.log("Product >>>>", newProduct.id);
     return this.prismaService.product.create({
       data: createProductDto,
     });
@@ -66,35 +71,26 @@ export class ProductService {
     updateProductDto: UpdateProductDto,
     files: Array<Express.Multer.File>,
   ): Promise<ProductModel> {
-    const _images = [];
-    for (const image of files) {
-      const _fileUrl = await this.cloudinaryService.uploadFile(
-        image,
-        'dynasty/products',
-        `${image.originalname?.split('.')[0]}`,
-      );
-      _images.push(_fileUrl);
+    if(files.length > 0){
+      const _images = [];
+      for (const image of files) {
+        const _fileUrl = await this.cloudinaryService.uploadFile(
+          image,
+          'dynasty/products',
+          `${image.originalname?.split('.')[0]}`,
+        );
+        _images.push(_fileUrl);
+      }
+      updateProductDto.images = _images;
     }
-    updateProductDto.images = _images;
-    if (updateProductDto?.price != null) {
-      updateProductDto.price.amount = Number(updateProductDto.price?.amount);
-    }
+
     return this.prismaService.product.update({
-      where: { id: id },
+      where: {id: id},
       data: updateProductDto,
     });
   }
 
   async deleteProduct(id: string): Promise<boolean> {
-    const _product = await this.prismaService.product.findUnique({
-      where: { id: id },
-    });
-    if (_product.images.length != 0) {
-      for (const item in _product.images) {
-        await this.deleteImageFile(item);
-      }
-    }
-
     const isDeleted = await this.prismaService.product.delete({
       where: { id: id },
     });

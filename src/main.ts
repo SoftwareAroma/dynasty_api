@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import {DocumentBuilder, OpenAPIObject, SwaggerModule} from '@nestjs/swagger';
 import { PrismaService } from '@prisma/prisma.service';
 import { PrismaClientExceptionFilter } from '@filter/exception.filter';
 import { AllExceptionFilter } from '@common';
@@ -15,19 +15,19 @@ import { AllExceptionFilter } from '@common';
  * ############### BOOTSTRAP THE APP ####################
  * ######################################################
  * */
-const bootstrap = async () => {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+const bootstrap = async (): Promise<void> => {
+  const app:NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // 'log' // remove log to disable logging
   });
   // app config service
   const configService = app.get(ConfigService);
-  const prismaService = app.get(PrismaService);
+  const prismaService: PrismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
   // string from environment file
-  const origin = configService.get<string>('FRONTEND_URL');
+  const origin: string = configService.get<string>('FRONTEND_URL');
   // api version
-  const apiVersion = configService.get<string>('API_VERSION');
-  const swaggerPath = 'swagger';
+  const apiVersion :string = configService.get<string>('API_VERSION');
+  const swaggerPath: string = 'swagger';
   // global prefix
   app.setGlobalPrefix('api');
   // enable CORS
@@ -68,7 +68,7 @@ const bootstrap = async () => {
    * ##################### SWAGGER CONFIG ######################
    * ###########################################################
    * */
-  const config = new DocumentBuilder()
+  const config: Omit<OpenAPIObject, any> = new DocumentBuilder()
     .setTitle(`DYNASTY URBAN STYLE API version ${apiVersion}`)
     .setDescription(
       'This is the backend api interface for the DYNASTY URBAN STYLE web project',
@@ -76,7 +76,7 @@ const bootstrap = async () => {
     .setVersion(`${apiVersion}`)
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
   // path for swagger
   SwaggerModule.setup(`${swaggerPath}`, app, document);
 
@@ -89,14 +89,14 @@ const bootstrap = async () => {
   const port = configService.get<number>('PORT');
   await app
     .listen(port)
-    .then(() => {
+    .then((): void => {
       console.log(`Server running on port http://localhost:${port}/api`);
       console.log(
         `Swagger running on port http://localhost:${port}/${swaggerPath}`,
       );
       console.log('Press CTRL-C to stop server');
     })
-    .catch((err) => {
+    .catch((err): void => {
       console.log('There was an error starting server. ', err);
     });
 };

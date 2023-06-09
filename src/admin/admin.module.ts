@@ -16,7 +16,10 @@ import { CaslModule } from '@casl/casl.module';
     }),
   ],
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [
+      AdminService,
+      // AdminJwtStrategy,
+  ],
   exports: [AdminService],
 })
 export class AdminModule {}

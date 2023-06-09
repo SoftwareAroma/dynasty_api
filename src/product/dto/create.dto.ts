@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {IsArray, IsInt, isInt, IsNotEmpty, IsNumber, IsOptional, IsString} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PriceType } from '@common';
 
@@ -14,14 +14,13 @@ export class CreateProductDto {
   description: string;
 
   @IsString()
-  @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
   price: PriceType;
 
   @IsArray()
-  @IsOptional()
   @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   images: string[];
 
@@ -36,37 +35,29 @@ export class CreateProductDto {
   depo: string;
 
   @IsString()
-  @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
   brand: string;
 
-  @IsString()
   @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
   rating: number;
 
-  @IsString()
   @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
   numReviews: number;
 
-  @IsString()
   @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
   numInStock: number;
 
-  @IsString()
-  @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
   colors: string[];
 
-  @IsString()
-  @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
   sizes: string[];

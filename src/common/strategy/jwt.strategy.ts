@@ -15,14 +15,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       // get access token form request object
       jwtFromRequest: (request: Request) => {
-        if (!request || !request.cookies) return null;
-        return request.cookies['access_token'];
+        // console.log("Request Cookie ", request.headers.cookie);
+        // console.log("Request Cookie ", request.headers.cookie);
+        if (!request || !request.cookies) {
+          return null;
+        }
+        else if (request.cookies['access_token'] != undefined || request.cookies['access_token'] != null) {
+          // console.log("Request Cookie ", request.cookies['access_token']);
+          return request.cookies['access_token'];
+        }else{
+          // console.log("Request Cookie Header ", request.headers.cookie);
+          return request.headers.cookie;
+        }
+
       },
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
     });
   }
   async validate(payload: any) {
+    // console.log(payload)
     const _user = await this.customerService.getProfile(payload.sub);
     if (_user?.id != undefined) {
       return {
