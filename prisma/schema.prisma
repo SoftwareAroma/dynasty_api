@@ -4,7 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:admin@postgres_prisma:5432/dynasty_api?schema=database&sslmode=prefer"
 }
 
 model Admin {

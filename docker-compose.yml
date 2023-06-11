@@ -1,6 +1,7 @@
 version: '3.9'
 services:
   api:
+    image: dynastyurbanstyle/dynasty-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,7 +18,7 @@ services:
     image: postgres:latest
     restart: always
     env_file:
-      - .env
+      - docker.env
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
@@ -28,7 +29,7 @@ services:
     image: dpage/pgadmin4:latest
     restart: always
     env_file:
-      - .env
+      - docker.env
     ports:
       - "8080:80"
     volumes:

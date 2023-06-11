@@ -1,4 +1,4 @@
-FROM node:18 AS builder
+FROM node:18-alpine AS builder
 
 # Create app directory
 WORKDIR /app
@@ -16,8 +16,9 @@ RUN yarn install
 COPY . .
 RUN yarn run build
 
-FROM node:18
-
+FROM node:18-alpine
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/yarn.lock ./

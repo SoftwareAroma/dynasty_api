@@ -13,7 +13,7 @@
     "start:dev:mig": "npx prisma migrate dev --name 'init' && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "start:migrate:prod": "npx prisma migrate deploy && yarn run start:prod",
+    "start:migrate:prod": "npx prisma migrate deploy &&  yarn run start:prod",
     "prisma:studio": "npx prisma studio",
     "prisma:migrate": "npx prisma migrate dev --name 'init'",
     "prisma:generate": "npx prisma generate",
