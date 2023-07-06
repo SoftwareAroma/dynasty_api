@@ -26,4 +26,4 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 5000
-CMD ["yarn", "run", "start:migrate:prod"]
+CMD ["yarn", "run", "start:migrate:production"]
