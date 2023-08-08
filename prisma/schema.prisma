@@ -39,6 +39,16 @@ model Customer {
   isAdmin     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt()
+  Cart        Cart[]
+}
+
+model Cart {
+  id         String    @id @unique @default(uuid())
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  customerId String
+  items      Product[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt()
 }
 
 model Product {
@@ -49,6 +59,8 @@ model Product {
   images      String[]
   depo        String
   category    String
+  Cart        Cart?    @relation(fields: [cartId], references: [id])
+  cartId      String?
   brand       String?  @default("Custom")
   rating      Int?     @default(0)
   numReviews  Int?     @default(0)

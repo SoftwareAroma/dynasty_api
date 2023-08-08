@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import {DocumentBuilder, OpenAPIObject, SwaggerModule} from '@nestjs/swagger';
+import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { PrismaService } from '@prisma/prisma.service';
 import { PrismaClientExceptionFilter } from '@filter/exception.filter';
 import { AllExceptionFilter } from '@common';
@@ -16,7 +16,7 @@ import { AllExceptionFilter } from '@common';
  * ######################################################
  * */
 const bootstrap = async (): Promise<void> => {
-  const app:NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
+  const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // 'log' // remove log to disable logging
   });
   // app config service
@@ -26,8 +26,8 @@ const bootstrap = async (): Promise<void> => {
   // string from environment file
   const origin: string = configService.get<string>('FRONTEND_URL');
   // api version
-  const apiVersion :string = configService.get<string>('API_VERSION');
-  const swaggerPath: string = 'swagger';
+  const apiVersion: string = configService.get<string>('API_VERSION');
+  const swaggerPath = 'swagger';
   // global prefix
   app.setGlobalPrefix('api');
   // enable CORS
