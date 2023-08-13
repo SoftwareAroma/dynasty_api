@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from '@common';
-import { CaslModule } from '@casl/casl.module';
+import {jwtConstants} from '@common';
+import { AdminResolver } from './admin.resolver';
+import {CaslModule} from "@casl/casl.module";
 
 @Module({
   imports: [
@@ -15,10 +15,9 @@ import { CaslModule } from '@casl/casl.module';
       signOptions: { expiresIn: jwtConstants.expiresIn },
     }),
   ],
-  controllers: [AdminController],
   providers: [
       AdminService,
-      // AdminJwtStrategy,
+      AdminResolver,
   ],
   exports: [AdminService],
 })

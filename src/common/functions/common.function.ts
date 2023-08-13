@@ -40,3 +40,20 @@ export const generateSalt = async (): Promise<string> => {
 //         cb(null, file.fieldname + '-' + uniqueSuffix + '.' + ext)
 //     }
 // });
+
+// Helper function to get the default value for a property type
+export const getDefaultPropertyValue = <T>(value: T): T => {
+  if (typeof value === 'boolean') {
+    return false as T;
+  }else if(typeof value === 'string'){
+    return '' as T;
+  } else if (typeof value === 'number') {
+    return 0 as T;
+  } else if (typeof value === 'object' && Array.isArray(value)) {
+    return [] as T;
+  } else if (typeof value === 'object' && value !== null) {
+    return {} as T;
+  }
+  // Add more cases for other types as needed
+  return value;
+}

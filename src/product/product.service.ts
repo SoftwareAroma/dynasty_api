@@ -1,9 +1,9 @@
 import {Injectable} from '@nestjs/common';
 import {Product as ProductModel} from '@prisma/client';
 import {PrismaService} from '@prisma/prisma.service';
-import {CreateProductDto} from '@product/dto/create.dto';
 import {CloudinaryService} from '@cloudinary/cloudinary.service';
-import {UpdateProductDto} from '@product/dto/update.dto';
+import {CreateProductInput} from "@product/dto/product.input.dto";
+import {UpdateProductInput} from "@product/dto/update.input.dto";
 
 @Injectable()
 export class ProductService {
@@ -14,8 +14,8 @@ export class ProductService {
 
   // create product
   async createProduct(
-    createProductDto: CreateProductDto,
-    files: Array<Express.Multer.File>,
+    createProductDto: CreateProductInput,
+    files?: Array<Express.Multer.File>,
   ): Promise<ProductModel | any> {
     if(files.length > 0){
       const _images = [];
@@ -39,12 +39,8 @@ export class ProductService {
   }
 
   /// get all products
-  async getProducts(): Promise<Array<ProductModel>> {
-    const _products = await this.prismaService.product.findMany();
-    if (_products == null) {
-      return undefined;
-    }
-    return _products;
+  async getProducts(): Promise<ProductModel[]> {
+    return this.prismaService.product.findMany();
   }
 
   /// get product by id
@@ -68,8 +64,8 @@ export class ProductService {
   /// update product
   async updateProduct(
     id: string,
-    updateProductDto: UpdateProductDto,
-    files: Array<Express.Multer.File>,
+    updateProductDto: UpdateProductInput,
+    files?: Array<Express.Multer.File>,
   ): Promise<ProductModel> {
     if(files.length > 0){
       const _images = [];

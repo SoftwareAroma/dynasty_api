@@ -1,28 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@prisma/prisma.service';
 import { CloudinaryService } from '@cloudinary/cloudinary.service';
 import {
   Employee as EmployeeModel,
   Attendance as AttendanceModel,
 } from '@prisma/client';
-import { CreateAttendanceDto, CreateEmployeeDto } from './dto/create.dto';
-import { UpdateAttendanceDto, UpdateEmployeeDto } from './dto/update.dto';
+import {CreateEmployeeInput} from "@employee/dto/employee.input.dto";
+import {UpdateEmployeeInput} from "@employee/dto/update.input.dto";
+import {CreateAttendanceInput} from "@employee/dto/attendance.input.dto";
+import {UpdateAttendanceInput} from "@employee/dto/attendance.update.dto";
 
 @Injectable()
 export class EmployeeService {
   constructor(
-    private readonly configService: ConfigService,
     private prismaService: PrismaService,
     private cloudinaryService: CloudinaryService,
   ) { }
 
   async createEmployee(
-    employeeDto: CreateEmployeeDto,
-    file: Express.Multer.File,
+    employeeInput: CreateEmployeeInput,
+    file?: Express.Multer.File,
   ): Promise<EmployeeModel> {
-    const _employee = await this.prismaService.employee.create({
-      data: employeeDto,
+    const _employee : EmployeeModel = await this.prismaService.employee.create({
+      data: employeeInput,
     });
     if (file != null) {
       await this.updateEmployeeAvatar(_employee.id, file);
@@ -80,11 +80,11 @@ export class EmployeeService {
 
   async updateEmployee(
     id: string,
-    updateEmployeeDto: UpdateEmployeeDto,
+    updateEmployeeInput: UpdateEmployeeInput,
   ): Promise<EmployeeModel> {
     return this.prismaService.employee.update({
       where: { id: id },
-      data: updateEmployeeDto,
+      data: updateEmployeeInput,
     });
   }
 
@@ -107,13 +107,13 @@ export class EmployeeService {
   // Attendance
   async clockIn(
     id: string,
-    attendanceDto: CreateAttendanceDto,
+    attendanceInput: CreateAttendanceInput,
   ): Promise<EmployeeModel> {
     return this.prismaService.employee.update({
       where: { id: id },
       data: {
         attendance: {
-          create: attendanceDto,
+          create: attendanceInput,
         },
       },
       include: {
@@ -125,7 +125,7 @@ export class EmployeeService {
   async clockOut(
     employeeId: string,
     attendanceId: string,
-    updateAttendanceDto: UpdateAttendanceDto,
+    updateAttendanceInput: UpdateAttendanceInput,
   ): Promise<EmployeeModel> {
     return this.prismaService.employee.update({
       where: { id: employeeId },
@@ -133,7 +133,7 @@ export class EmployeeService {
         attendance: {
           update: {
             where: { id: attendanceId },
-            data: updateAttendanceDto,
+            data: updateAttendanceInput,
           },
         },
       },

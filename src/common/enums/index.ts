@@ -1,2 +1,2 @@
 export {Role} from './role.enum';
-export {Actions} from './actions.enum';
+export {Action} from './actions.enum';

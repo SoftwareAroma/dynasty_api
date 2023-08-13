@@ -6,12 +6,7 @@ export {
   // storage,
 } from './functions/common.function';
 
-export { Role, Actions } from './enums';
-
-export { FacebookAuthGuard, GoogleAuthGuard, JwtAuthGuard } from './guards';
-
-export { jwtConstants, PriceType, AttendanceType } from './constants';
-export {JwtStrategy} from './strategy';
+export { Role, Action } from './enums';
 
 export {
   Roles,
@@ -20,5 +15,11 @@ export {
   CHECK_POLICIES_KEY,
 } from './decorators';
 
-export { HttpExceptionFilter } from './config/http-exception.filter';
-export { AllExceptionFilter } from './config/all-exception.filter';
+export { FacebookAuthGuard, GoogleAuthGuard, JwtAuthGuard } from './guards';
+
+export { jwtConstants, PriceType, AttendanceType } from './constants';
+export {JwtStrategy} from './strategy';
+
+export * from './functions/common.function';
+export * from './auth/policies.guard';
+export * from './strategy/index';

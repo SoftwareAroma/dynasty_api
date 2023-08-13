@@ -1,14 +1,15 @@
 import { AbilityBuilder, PureAbility } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
-import { Actions } from '@common/enums/actions.enum';
-import { Role } from '@common';
 import {
-  Admin as AdminModel,
-  Customer as CustomerModel,
-  Product as ProductModel,
-  Employee as EmployeeModel,
+    Admin as AdminModel,
+    Customer as CustomerModel,
+    Product as ProductModel,
+    Cart as CartModel,
+    Attendance as AttendanceModel,
+    Employee as EmployeeModel,
 } from '@prisma/client';
 import { createPrismaAbility, PrismaQuery, Subjects } from '@casl/prisma';
+import { Role, Action } from '@common';
 
 export type AppAbility = PureAbility<
   [
@@ -16,11 +17,13 @@ export type AppAbility = PureAbility<
     (
       | 'all'
       | Subjects<{
-          CustomerModel: CustomerModel;
-          AdminModel: AdminModel;
-          ProductModel: ProductModel;
-          EmployeeModel: EmployeeModel;
-        }>
+        CustomerModel: CustomerModel;
+        AdminModel: AdminModel;
+        ProductModel: ProductModel;
+        CartModel: CartModel;
+        AttendanceModel: AttendanceModel;
+        EmployeeModel: EmployeeModel;
+      }>
     ),
   ],
   PrismaQuery
@@ -28,27 +31,31 @@ export type AppAbility = PureAbility<
 
 @Injectable()
 export class CaslAbilityFactory {
-  createForUser(user: CustomerModel | AdminModel) {
+  createForUser(user: any) : AppAbility {
     const { can, cannot, build } = new AbilityBuilder<AppAbility>(
       createPrismaAbility,
     );
 
-    if (user.role == Role.USER) {
-      can(Actions.Create, 'CustomerModel');
-      can(Actions.Read, 'CustomerModel');
-      can(Actions.Read, 'AdminModel');
-      can(Actions.Read, 'ProductModel');
-      cannot(Actions.Create, 'ProductModel');
-      cannot(Actions.Update, 'ProductModel');
-      cannot(Actions.Delete, 'ProductModel');
-      cannot(Actions.Manage, 'EmployeeModel');
+    if (user.role == Role.ADMIN) {
+        can(Action.Manage, 'all');
+        can(Action.Create, 'all');
+        can(Action.Delete, 'all');
+        can(Action.Update, 'all');
+        can([Action.Update, Action.Delete], ['AdminModel'], { id: user.id });
+    }else if(user.role == Role.USER){
+        console.log("Status Role :", user.role == Role.USER);
+        can(Action.Read, 'all');
+
+        can(Action.Create, 'CustomerModel');
+        can([Action.Update, Action.Delete], ['CustomerModel'], { id: user.id });
+
+        cannot(Action.Create, 'all');
+        cannot(Action.Delete, 'all');
+        cannot(Action.Update, 'all');
     } else {
-      can(Actions.Manage, 'all');
+      can(Action.Read, 'all');
+      cannot(Action.Manage, 'all');
     }
-
-    can([Actions.Update, Actions.Delete], ['AdminModel'], { id: user.id });
-
-    can([Actions.Update, Actions.Delete], ['CustomerModel'], { id: user.id });
 
     return build();
   }

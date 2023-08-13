@@ -1,18 +1,23 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import configuration, {AllExceptionFilter, JwtStrategy} from '@common';
+import configuration, {JwtStrategy} from '@common';
 import { AdminModule } from '@admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
 import { ProductModule } from '@product/product.module';
 import { PrismaModule } from '@prisma/prisma.module';
 import { CloudinaryModule } from '@cloudinary/cloudinary.module';
-import * as Joi from 'joi';
+import Joi from 'joi';
 import { EmployeeModule } from '@employee/employee.module';
-import { PaymentModule } from '@payment/payment.module';
 import { APP_FILTER } from '@nestjs/core';
+import { AppResolver } from './app.resolver';
+import {GraphQLModule} from "@nestjs/graphql";
+import {ApolloDriver} from "@nestjs/apollo";
+import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
+import {PrismaClientExceptionFilter} from "@filter/exception.filter";
+import {HttpExceptionFilter} from "@filter/http-exception.filter";
+import {GqlExceptionFilter} from "@filter/graphql-exception.filter";
 
 @Module({
   imports: [
@@ -21,7 +26,6 @@ import { APP_FILTER } from '@nestjs/core';
     CustomerModule,
     ProductModule,
     EmployeeModule,
-    PaymentModule,
 
     // prisma for database query and connection
     PrismaModule,
@@ -32,6 +36,31 @@ import { APP_FILTER } from '@nestjs/core';
     ThrottlerModule.forRoot({
       ttl: 60,
       limit: 10,
+    }),
+
+    /// GRAPHQL MODULE CONFIGURATION
+    GraphQLModule.forRoot({
+      installSubscriptionHandlers: true,
+      driver: ApolloDriver,
+      subscriptions: {
+        'graphql-ws': true
+      },
+      autoSchemaFile: true,
+      introspection: true, // Enable introspection
+      sortSchema: true,
+      playground: false,
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault()
+      ],
+      debug: true,
+      cors: {
+        origin: true,
+        credentials: true,
+      },
+      // add context object for request and response
+      context: ({ req, res }):{req: any, res: any} => {
+        return { req, res };
+      },
     }),
 
     /// configurations
@@ -52,13 +81,21 @@ import { APP_FILTER } from '@nestjs/core';
       },
     }),
   ],
-  controllers: [AppController],
   providers: [
     AppService,
+    AppResolver,
     JwtStrategy,
     {
       provide: APP_FILTER,
-      useClass: AllExceptionFilter,
+      useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GqlExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: PrismaClientExceptionFilter,
     },
   ],
 })

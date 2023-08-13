@@ -1,14 +1,10 @@
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
-import { PrismaService } from '@prisma/prisma.service';
-import { PrismaClientExceptionFilter } from '@filter/exception.filter';
-import { AllExceptionFilter } from '@common';
 
 /*
  * ######################################################
@@ -21,25 +17,20 @@ const bootstrap = async (): Promise<void> => {
   });
   // app config service
   const configService = app.get(ConfigService);
-  const prismaService: PrismaService = app.get(PrismaService);
-  await prismaService.enableShutdownHooks(app);
-  // string from environment file
-  const origin: string = configService.get<string>('FRONTEND_URL');
-  // api version
-  const apiVersion: string = configService.get<string>('API_VERSION');
-  const swaggerPath = 'swagger';
+  app.enableShutdownHooks();
   // global prefix
   app.setGlobalPrefix('api');
   // enable CORS
   app.enableCors({
-    origin: origin,
+    origin: "*",
+      credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
   });
 
-  // middlewares
+  /// middlewares
   app.use(cookieParser());
-  /* APP VERSIONING */
+  /// APP VERSIONING
   app.enableVersioning({
     type: VersioningType.URI,
   });
@@ -57,33 +48,7 @@ const bootstrap = async (): Promise<void> => {
    * #################### USE GLOBAL PIPES #####################
    * ###########################################################
    * */
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-    }),
-  );
-
-  /*
-   * ###########################################################
-   * ##################### SWAGGER CONFIG ######################
-   * ###########################################################
-   * */
-  const config: Omit<OpenAPIObject, any> = new DocumentBuilder()
-    .setTitle(`DYNASTY URBAN STYLE API version ${apiVersion}`)
-    .setDescription(
-      'This is the backend api interface for the DYNASTY URBAN STYLE web project',
-    )
-    .setVersion(`${apiVersion}`)
-    .build();
-
-  const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
-  // path for swagger
-  SwaggerModule.setup(`${swaggerPath}`, app, document);
-
-  // exception handling
-  const { httpAdapter } = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
-  app.useGlobalFilters(new AllExceptionFilter(app.get(HttpAdapterHost)));
+  app.useGlobalPipes(new ValidationPipe());
 
   // get the port from the config file
   const port = configService.get<number>('PORT');
@@ -91,9 +56,7 @@ const bootstrap = async (): Promise<void> => {
     .listen(port)
     .then((): void => {
       console.log(`Server running on port http://localhost:${port}/api`);
-      console.log(
-        `Swagger running on port http://localhost:${port}/${swaggerPath}`,
-      );
+      console.log(`Server running on port http://localhost:${port}/graphql`);
       console.log('Press CTRL-C to stop server');
     })
     .catch((err): void => {

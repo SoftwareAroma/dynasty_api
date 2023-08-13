@@ -1,78 +1,103 @@
 import { AppAbility } from '@casl/casl-ability.factory/casl-ability.factory';
 import { IPolicyHandler } from '@casl/interface/policy.interface';
-import { Actions } from '@common';
+import { Action } from '@common';
 
-/// Customer
+/// customer
+// export class CreateCustomerPolicyHandler implements IPolicyHandler {
+//   handle(ability: AppAbility) {
+//     return ability.can(Action.Create, 'CustomerModel');
+//   }
+// }
+
 export class ReadCustomerPolicyHandler implements IPolicyHandler {
   handle(ability: AppAbility) {
-    return ability.can(Actions.Read, 'CustomerModel');
+    return ability.can(Action.Read, 'CustomerModel');
   }
 }
 
 export class UpdateCustomerPolicyHandler implements IPolicyHandler {
   handle(ability: AppAbility) {
-    return ability.can(Actions.Update, 'CustomerModel');
+    return ability.can(Action.Update, 'CustomerModel');
   }
 }
 
 export class DeleteCustomerPolicyHandler implements IPolicyHandler {
   handle(ability: AppAbility) {
-    return ability.can(Actions.Delete, 'CustomerModel');
+    return ability.can(Action.Delete, 'CustomerModel');
   }
 }
 
-/// product
-export class CreateProductPolicyHandler implements IPolicyHandler {
-  handle(ability: AppAbility) {
-    return ability.can(Actions.Create, 'ProductModel');
-  }
-}
-export class ReadProductPolicyHandler implements IPolicyHandler {
-  handle(ability: AppAbility) {
-    return ability.can(Actions.Read, 'ProductModel');
-  }
-}
-
-export class UpdateProductPolicyHandler implements IPolicyHandler {
-  handle(ability: AppAbility) {
-    return ability.can(Actions.Update, 'ProductModel');
-  }
-}
-
-export class DeleteProductPolicyHandler implements IPolicyHandler {
-  handle(ability: AppAbility) {
-    return ability.can(Actions.Delete, 'ProductModel');
-  }
-}
-
-/// Admin
-export class ReadAdminPolicyHandler implements IPolicyHandler {
-  handle(ability: AppAbility) {
-    return ability.can(Actions.Read, 'AdminModel');
-  }
-}
-
-export class UpdateAdminPolicyHandler implements IPolicyHandler {
-  handle(ability: AppAbility) {
-    return ability.can(Actions.Update, 'AdminModel');
-  }
-}
-
-export class DeleteAdminPolicyHandler implements IPolicyHandler {
-  handle(ability: AppAbility) {
-    return ability.can(Actions.Delete, 'AdminModel');
-  }
-}
-
-// Employee
+/// employee
 export class CreateEmployeePolicyHandler implements IPolicyHandler {
   handle(ability: AppAbility) {
-    return ability.can(Actions.Create, 'EmployeeModel');
+    return ability.can(Action.Create, 'EmployeeModel');
+  }
+}
+export class ReadEmployeePolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Read, 'EmployeeModel');
+  }
+}
+
+export class UpdateEmployeePolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Update, 'EmployeeModel');
   }
 }
 
 export class DeleteEmployeePolicyHandler implements IPolicyHandler {
   handle(ability: AppAbility) {
-    return ability.can(Actions.Delete, 'EmployeeModel');
+    return ability.can(Action.Delete, 'EmployeeModel');
+  }
+}
+
+/// attendance
+export class ReadAttendancePolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Read, 'AttendanceModel');
+  }
+}
+
+
+/// product
+export class CreateProductPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Create, 'ProductModel');
+  }
+}
+export class ReadProductPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Read, 'ProductModel');
+  }
+}
+
+export class UpdateProductPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Update, 'ProductModel');
+  }
+}
+
+export class DeleteProductPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Delete, 'ProductModel');
+  }
+}
+
+/// Admin 
+export class ReadAdminPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Read, 'AdminModel');
+  }
+}
+
+export class UpdateAdminPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Update, 'AdminModel');
+  }
+}
+
+export class DeleteAdminPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility) {
+    return ability.can(Action.Delete, 'AdminModel');
   }
 }
