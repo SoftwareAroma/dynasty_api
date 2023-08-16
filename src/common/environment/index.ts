@@ -1,0 +1,36 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
+
+const PORT = parseInt(process.env.PORT, 10) || 5000
+const DOMAIN = process.env.DOMAIN
+const DATABASE_URL = process.env.DATABASE_URL
+const ORIGIN_URL = process.env.ORIGIN_URL
+const UPLOADS_DIR = process.env.UPLOADS_DIR
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
+const CLOUDINARY_NAME = process.env.CLOUDINARY_NAME
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET
+
+export default () => ({
+  PORT,
+  DOMAIN,
+  DATABASE_URL,
+  ORIGIN_URL,
+  UPLOADS_DIR,
+  STRIPE_SECRET_KEY,
+  CLOUDINARY_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET
+});
+
+export {
+  PORT,
+  DOMAIN,
+  DATABASE_URL,
+  ORIGIN_URL,
+  UPLOADS_DIR,
+  STRIPE_SECRET_KEY,
+  CLOUDINARY_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET
+}

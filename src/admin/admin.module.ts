@@ -4,7 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import {jwtConstants} from '@common';
 import { AdminResolver } from './admin.resolver';
-import {CaslModule} from "@casl/casl.module";
+import {CaslModule} from "@shared/casl/casl.module";
 
 @Module({
   imports: [

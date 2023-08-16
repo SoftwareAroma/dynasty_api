@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@prisma/prisma.service';
-import { CloudinaryService } from '@cloudinary/cloudinary.service';
+import { PrismaService } from '@shared/prisma/prisma.service';
+import { CloudinaryService } from '@shared/cloudinary/cloudinary.service';
 import {
   Employee as EmployeeModel,
   Attendance as AttendanceModel,

@@ -1,5 +1,5 @@
-import { AppAbility } from '@casl/casl-ability.factory/casl-ability.factory';
-import { IPolicyHandler } from '@casl/interface/policy.interface';
+import { AppAbility } from '@shared/casl/casl-ability.factory/casl-ability.factory';
+import { IPolicyHandler } from '@shared/casl/interface/policy.interface';
 import { Action } from '@common';
 
 /// customer

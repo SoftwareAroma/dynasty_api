@@ -16,7 +16,7 @@ import {
     DeleteEmployeePolicyHandler, ReadAttendancePolicyHandler,
     ReadEmployeePolicyHandler,
     UpdateEmployeePolicyHandler,
-} from "@casl/handler/policy.handler";
+} from "@shared/casl/handler/policy.handler";
 import {PubSub} from "graphql-subscriptions";
 import {Employee as EmployeeModel} from "@prisma/client";
 

@@ -12,12 +12,13 @@ import {CheckPolicies, PoliciesGuard} from "@common";
 import {
     ReadCustomerPolicyHandler,
     UpdateCustomerPolicyHandler,
-    DeleteCustomerPolicyHandler,
-} from "@casl/handler/policy.handler";
+    DeleteCustomerPolicyHandler, UpdateAdminPolicyHandler,
+} from "@shared/casl/handler/policy.handler";
 import {CreateCartInput} from "@customer/dto/cart.input.dto";
 import {UpdateCartInput} from "@customer/dto/cart.update.dto";
 import {PubSub} from "graphql-subscriptions";
 import {Customer as CustomerModel} from "@prisma/client";
+import {FileUpload, GraphQLUpload} from "graphql-upload";
 
 /// pub sub
 const pubSub : PubSub = new PubSub();
@@ -71,6 +72,17 @@ export class CustomerResolver {
         @Args('id') id: string,
     ): Promise<ICustomer> {
         return await this.customerService.getProfile(id);
+    }
+
+    /// update avatar
+    @Mutation(() => Boolean)
+    @UseGuards(GqlAuthGuard, PoliciesGuard)
+    @CheckPolicies(new UpdateCustomerPolicyHandler())
+    async updateCustomerAvatar(
+        @Args('id') id: string,
+        @Args('avatar', { type: () => GraphQLUpload }) avatar: FileUpload,
+    ): Promise<boolean> {
+        return await this.customerService.updateAvatar(id, avatar);
     }
 
     /// update customer -> delete avatar

@@ -2,29 +2,30 @@ import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { Customer as CustomerModel } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword} from '@common';
-import { PrismaService } from '@prisma/prisma.service';
-import { CloudinaryService } from '@cloudinary/cloudinary.service';
+import { PrismaService } from '@shared/prisma/prisma.service';
 import {Ctx} from "@common/context";
 import {ConfigService} from "@nestjs/config";
 import {CreateCustomerInput} from "@customer/dto/customer.input.dto";
 import {LoginCustomerInput} from "@customer/dto/login.input.dto";
 import {UpdateCustomerInput} from "@customer/dto/update.input.dto";
-import {CreateAttendanceInput} from "@employee/dto/attendance.input.dto";
 import {CreateCartInput} from "@customer/dto/cart.input.dto";
-import {UpdateAttendanceInput} from "@employee/dto/attendance.update.dto";
-import {Employee as EmployeeModel} from ".prisma/client";
 import {UpdateCartInput} from "@customer/dto/cart.update.dto";
+import {FileUpload} from "graphql-upload";
+import {uploadFile} from "@shared";
 
 @Injectable()
 export class CustomerService {
   constructor(
     private prismaService: PrismaService,
     private readonly jwtService: JwtService,
-    private cloudinaryService: CloudinaryService,
     private readonly configService: ConfigService,
   ) { }
 
-  /// create a customer
+  /**
+   * register customer
+   * @param createCustomerInput
+   * @param context
+   */
   async register(createCustomerInput: CreateCustomerInput, context:Ctx): Promise<CustomerModel> {
     // check if email already exists
     const emailExists = await this.prismaService.customer.findUnique({
@@ -60,7 +61,11 @@ export class CustomerService {
     return this.exclude(_customer, ['password', 'salt']);
   }
 
-  // log in customer
+  /**
+   * login customer
+   * @param loginCustomerDto
+   * @param context
+   */
   async loginCustomer(loginCustomerDto: LoginCustomerInput, context:Ctx): Promise<CustomerModel> {
     const customer = await this.prismaService.customer.findUnique({
       where: { email: loginCustomerDto.email },
@@ -86,27 +91,30 @@ export class CustomerService {
   }
 
   // validate customer
-  async validateCustomer(
-    loginCustomerDto: LoginCustomerInput,
-  ): Promise<CustomerModel> {
-    const customer = await this.prismaService.customer.findUnique({
-      where: { email: loginCustomerDto.email },
-    });
-    if (!customer) {
-      return undefined;
-    }
-    // compare passwords
-    const isPasswordValid = await comparePassword(loginCustomerDto.password, customer.password);
-    if (!isPasswordValid) {
-      return null;
-    }
-    if (!customer) {
-      return undefined;
-    }
-    return customer;
-  }
+  // async validateCustomer(
+  //   loginCustomerDto: LoginCustomerInput,
+  // ): Promise<CustomerModel> {
+  //   const customer = await this.prismaService.customer.findUnique({
+  //     where: { email: loginCustomerDto.email },
+  //   });
+  //   if (!customer) {
+  //     return undefined;
+  //   }
+  //   // compare passwords
+  //   const isPasswordValid = await comparePassword(loginCustomerDto.password, customer.password);
+  //   if (!isPasswordValid) {
+  //     return null;
+  //   }
+  //   if (!customer) {
+  //     return undefined;
+  //   }
+  //   return customer;
+  // }
 
-  // get user profile
+  /**
+   * get customer by id
+   * @param id
+   */
   async getProfile(id: string): Promise<CustomerModel> {
     // console.log("Customer Id ", id);
     const customer: CustomerModel = await this.prismaService.customer.findUnique({
@@ -119,7 +127,9 @@ export class CustomerService {
     return this.exclude(customer, ['password', 'salt']);
   }
 
-  /// get all customers
+  /**
+   * get all customers
+   */
   async getCustomers(): Promise<CustomerModel[]> {
     const _customers: CustomerModel[] = await this.prismaService.customer.findMany({
         include: {Cart: true}
@@ -130,7 +140,11 @@ export class CustomerService {
     return _customers;
   }
 
-  // update customer profile
+  /**
+   * update profile
+   * @param id
+   * @param updateCustomerDto
+   */
   async updateProfile(
     id: string,
     updateCustomerDto: UpdateCustomerInput,
@@ -142,7 +156,11 @@ export class CustomerService {
     return this.exclude(updated, ['password', 'salt']);
   }
 
-  /// add to cart
+  /**
+   * add to cart
+   * @param id
+   * @param cartInput
+   */
   async addToCart(
       id: string,
       cartInput: CreateCartInput,
@@ -182,14 +200,19 @@ export class CustomerService {
     });
   }
 
-  /// update the avatar of customer
-  async updateAvatar(id: string, file: Express.Multer.File): Promise<boolean> {
-    const _uploadFile = await this.cloudinaryService.uploadFile(
+  /**
+   * update avatar
+   * @param id
+   * @param file
+   */
+  async updateAvatar(id: string, file: FileUpload): Promise<boolean> {
+    const _uploadFile = await uploadFile(
       file,
+      `${file.filename?.split('.')[0]}`,
       'dynasty/customer/avatar',
-      `${file.originalname?.split('.')[0]}`,
+        'dynasty_customer_avatar'
     );
-    const _customer = await this.prismaService.customer.update({
+    const _customer : CustomerModel = await this.prismaService.customer.update({
       where: {
         id: id,
       },
@@ -200,7 +223,10 @@ export class CustomerService {
     return !!_customer;
   }
 
-  /// delete the customer avatar
+  /**
+   * delete avatar
+   * @param id
+   */
   async deleteAvatar(id: string): Promise<boolean> {
     const _customer = await this.prismaService.customer.findUnique({
       where: { id: id },
@@ -218,7 +244,10 @@ export class CustomerService {
     return !!saved;
   }
 
-  // delete customer data from database
+  /**
+   * delete customer
+   * @param id
+   */
   async deleteCustomerData(id: string): Promise<boolean> {
     const _customer = await this.prismaService.customer.delete({
       where: { id: id },
@@ -251,7 +280,12 @@ export class CustomerService {
   // }
 
 
-  /// Exclude keys from user
+  /**
+   * Exclude properties from a user object
+   * @param user
+   * @param keys
+   * @private
+   */
   private exclude<CustomerModel, Key extends keyof CustomerModel>(
       user: CustomerModel,
       keys: Key[],

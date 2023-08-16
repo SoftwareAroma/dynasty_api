@@ -6,8 +6,8 @@ import { AdminModule } from '@admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
 import { ProductModule } from '@product/product.module';
-import { PrismaModule } from '@prisma/prisma.module';
-import { CloudinaryModule } from '@cloudinary/cloudinary.module';
+import { PrismaModule } from '@shared/prisma/prisma.module';
+import { CloudinaryModule } from '@shared/cloudinary/cloudinary.module';
 import Joi from 'joi';
 import { EmployeeModule } from '@employee/employee.module';
 import { APP_FILTER } from '@nestjs/core';
@@ -15,9 +15,11 @@ import { AppResolver } from './app.resolver';
 import {GraphQLModule} from "@nestjs/graphql";
 import {ApolloDriver} from "@nestjs/apollo";
 import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
-import {PrismaClientExceptionFilter} from "@filter/exception.filter";
-import {HttpExceptionFilter} from "@filter/http-exception.filter";
-import {GqlExceptionFilter} from "@filter/graphql-exception.filter";
+import {
+  GqlExceptionFilter,
+  HttpExceptionFilter,
+  PrismaClientExceptionFilter
+} from "@shared";
 
 @Module({
   imports: [
@@ -49,6 +51,7 @@ import {GqlExceptionFilter} from "@filter/graphql-exception.filter";
       introspection: true, // Enable introspection
       sortSchema: true,
       playground: false,
+      uploads: false,
       plugins: [
         ApolloServerPluginLandingPageLocalDefault()
       ],

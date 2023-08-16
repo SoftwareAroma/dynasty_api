@@ -1,4 +1,4 @@
-import { PolicyHandler } from "@casl/interface/policy.interface";
+import { PolicyHandler } from "@shared/casl/interface/policy.interface";
 import { SetMetadata } from "@nestjs/common";
 
 export const CHECK_POLICIES_KEY = 'check_policy';

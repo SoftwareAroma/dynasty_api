@@ -3,7 +3,7 @@ import { CustomerService } from './customer.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from '@common';
-import {CaslModule} from '@casl/casl.module';
+import {CaslModule} from '@shared/casl/casl.module';
 import { CustomerResolver } from './customer.resolver';
 
 @Module({

@@ -14,7 +14,8 @@ import {
     DeleteAdminPolicyHandler,
     ReadAdminPolicyHandler,
     UpdateAdminPolicyHandler
-} from "@casl/handler/policy.handler";
+} from "@shared/casl/handler/policy.handler";
+import {FileUpload, GraphQLUpload} from 'graphql-upload';
 
 @Resolver(() => GAdmin)
 export class AdminResolver {
@@ -22,7 +23,11 @@ export class AdminResolver {
         private readonly adminService: AdminService,
     ) {}
 
-    /// Create an admin
+    /**
+     * create admin
+     * @param createAdminInput
+     * @param context
+     */
     @Mutation(() => GAdmin, {name: "createAdmin"})
     async createAdmin(
         @Args('createAdminInput') createAdminInput: CreateAdminInput,
@@ -31,7 +36,11 @@ export class AdminResolver {
         return await this.adminService.register(createAdminInput, context);
     }
 
-    /// log in admin
+    /**
+     * login admin
+     * @param loginAdminInput
+     * @param context
+     */
     @Mutation(() => GAdmin, {name: "loginAdmin"})
     async loginAdmin(
         @Args('loginAdminInput') loginAdminInput: LoginAdminInput,
@@ -41,7 +50,9 @@ export class AdminResolver {
         return await this.adminService.loginAdmin(loginAdminInput, context);
     }
 
-    /// Get all admins
+    /**
+     * get all admins
+     */
     @Query(() => [GAdmin], {name: "getAdmins"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
@@ -49,7 +60,10 @@ export class AdminResolver {
         return await this.adminService.getAdmins();
     }
 
-    /// get the profile of the admin
+    /**
+     * get admin profile
+     * @param context
+     */
     @Query(() => GAdmin, {name: "getAdminProfile"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
@@ -59,7 +73,10 @@ export class AdminResolver {
         return this.adminService.getProfile(user.id);
     }
 
-    /// Get admin by id
+    /**
+     * get admin by id
+     * @param id
+     */
     @Query(() => GAdmin, {name: "getAdminById"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
@@ -67,18 +84,26 @@ export class AdminResolver {
         return await this.adminService.getProfile(id);
     }
 
-    /// update avatar
-    // @Mutation(() => Boolean)
-    // @CheckPolicies(new UpdateAdminPolicyHandler())
-    // @UseGuards(JwtAuthGuard, PoliciesGuard)
-    // async updateAdminAvatar(
-    //     @Args('id') id: string,
-    //     @Args('avatar', { type: () => GraphQLUpload }) avatar: FileUpload,
-    // ): Promise<boolean> {
-    //     return await this.adminService.updateAvatar(id, avatar);
-    // }
+    /**
+     * update admin avatar
+     * @param id
+     * @param avatar
+     */
+    @Mutation(() => Boolean)
+    @UseGuards(GqlAuthGuard, PoliciesGuard)
+    @CheckPolicies(new UpdateAdminPolicyHandler())
+    async updateAdminAvatar(
+        @Args('id') id: string,
+        @Args('avatar', { type: () => GraphQLUpload }) avatar: FileUpload,
+    ): Promise<boolean> {
+        return await this.adminService.updateAvatar(id, avatar);
+    }
 
-    /// delete avatar
+    /**
+     * delete admin avatar
+     * @param id
+     *
+     */
     @Mutation(() => Boolean, {name: "deleteAdminAvatar"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateAdminPolicyHandler())
@@ -88,7 +113,11 @@ export class AdminResolver {
         return await this.adminService.deleteAvatar(id);
     }
 
-    /// update admin
+    /**
+     * update admin profile
+     * @param id
+     * @param updateAdminInput
+     */
     @Mutation(() => GAdmin, {name: "updateAdmin"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateAdminPolicyHandler())
@@ -100,14 +129,21 @@ export class AdminResolver {
     }
 
 
-    /// logout admin
+    /**
+     * logout admin
+     * @param context
+     */
     @Query(() => Boolean, {name: "logoutAdmin"})
     async logoutAdmin(@Context() context:any): Promise<boolean> {
         context.res.cookie('access_token', undefined, { maxAge: 1 });
         return true;
     }
 
-    /// delete admin
+    /**
+     * delete admin
+     * @param id
+     * @param context
+     */
     @Mutation(() => Boolean, {name: "deleteAdmin"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new DeleteAdminPolicyHandler())

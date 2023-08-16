@@ -1,4 +1,4 @@
-export { default } from './config/configuration';
+export { default } from '@common/environment';
 export {
   hashPassword,
   comparePassword,
@@ -23,3 +23,4 @@ export {JwtStrategy} from './strategy';
 export * from './functions/common.function';
 export * from './auth/policies.guard';
 export * from './strategy/index';
+export * from './environment/index';

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductResolver } from './product.resolver';
-import {CaslModule} from "@casl/casl.module";
+import {CaslModule} from "@shared/casl/casl.module";
 
 @Module({
   imports: [

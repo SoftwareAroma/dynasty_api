@@ -1,30 +1,35 @@
-import {Injectable} from '@nestjs/common';
+import {HttpException, Injectable} from '@nestjs/common';
 import {Product as ProductModel} from '@prisma/client';
-import {PrismaService} from '@prisma/prisma.service';
-import {CloudinaryService} from '@cloudinary/cloudinary.service';
+import {PrismaService} from '@shared/prisma/prisma.service';
 import {CreateProductInput} from "@product/dto/product.input.dto";
 import {UpdateProductInput} from "@product/dto/update.input.dto";
+import {deleteFile, uploadFile} from "@shared";
+import {FileUpload} from "graphql-upload";
 
 @Injectable()
 export class ProductService {
   constructor(
     private prismaService: PrismaService,
-    private cloudinaryService: CloudinaryService,
   ) { }
 
-  // create product
+  /**
+   * create a new product
+   * @param createProductDto
+   * @param files
+   */
   async createProduct(
     createProductDto: CreateProductInput,
-    files?: Array<Express.Multer.File>,
-  ): Promise<ProductModel | any> {
+    files?: Array<FileUpload>,
+  ): Promise<ProductModel> {
     if(files.length > 0){
-      const _images = [];
+      const _images : any[] = [];
       for (const image of files) {
         // console.log("data ", files);
-        const _fileUrl = await this.cloudinaryService.uploadFile(
+        const _fileUrl : string = await uploadFile(
             image,
+            `${image.filename?.split('.')[0]}`,
             'dynasty/products',
-            `${image.originalname?.split('.')[0]}`,
+            'dynasty_product_image'
         );
         _images.push(_fileUrl);
       }
@@ -38,12 +43,17 @@ export class ProductService {
     });
   }
 
-  /// get all products
+  /**
+   * get all products
+   */
   async getProducts(): Promise<ProductModel[]> {
     return this.prismaService.product.findMany();
   }
 
-  /// get product by id
+  /**
+   * get product by id
+   * @param id
+   */
   async getProductById(id: string): Promise<ProductModel> {
     return this.prismaService.product.findUnique({
       where: {
@@ -52,7 +62,10 @@ export class ProductService {
     });
   }
 
-  // get product by name
+  /**
+   * get product by name
+   * @param name
+   */
   async getProductByName(name: string): Promise<ProductModel> {
     return this.prismaService.product.findFirst({
       where: {
@@ -61,19 +74,25 @@ export class ProductService {
     });
   }
 
-  /// update product
+  /**
+   * update product
+   * @param id
+   * @param updateProductDto
+   * @param files
+   */
   async updateProduct(
     id: string,
     updateProductDto: UpdateProductInput,
-    files?: Array<Express.Multer.File>,
+    files?: Array<FileUpload>,
   ): Promise<ProductModel> {
     if(files.length > 0){
-      const _images = [];
+      const _images : any[] = [];
       for (const image of files) {
-        const _fileUrl = await this.cloudinaryService.uploadFile(
+        const _fileUrl : string = await uploadFile(
           image,
+          `${image.filename?.split('.')[0]}`,
           'dynasty/products',
-          `${image.originalname?.split('.')[0]}`,
+            'dynasty_product_image'
         );
         _images.push(_fileUrl);
       }
@@ -87,36 +106,40 @@ export class ProductService {
   }
 
   async deleteProduct(id: string): Promise<boolean> {
-    const isDeleted = await this.prismaService.product.delete({
+    const isDeleted : ProductModel = await this.prismaService.product.delete({
       where: { id: id },
     });
     return !!isDeleted;
   }
 
-  // delete the file from the database
+  /**
+   * delete the product image from the cloudinary storage
+   * @param productId
+   * @param fileName
+   */
   async deleteProductImage(
     productId: string,
     fileName: string,
   ): Promise<boolean> {
     /// find the product with the product id
-    const _product = await this.prismaService.product.findUnique({
+    if (productId == null) {
+      throw new HttpException("Product id is required", 400);
+    }
+    const _product : ProductModel = await this.prismaService.product.findUnique({
       where: { id: productId },
     });
-    if (productId == null) {
-      return false;
-    }
-    const isDeleted = await this.deleteImageFile(fileName);
+    const isDeleted : boolean = await this.deleteImageFile(fileName);
     if (isDeleted) {
-      const images = _product.images;
+      const images : string[] = _product.images;
       /// delete the image from the product list of images
       images.splice(
-        images.findIndex((image) => image == fileName),
+        images.findIndex((image:string) : boolean => image == fileName),
         1,
       );
       /// update the images list with the new list of images after the deletion
       _product.images = images;
       /// save the changes made to the product
-      const updated = await this.prismaService.product.update({
+      const updated : ProductModel = await this.prismaService.product.update({
         where: { id: productId },
         data: {
           images: _product.images,
@@ -128,10 +151,14 @@ export class ProductService {
     }
   }
 
-  /// delete image file
+  /**
+   * delete the file from the cloudinary storage
+   * @param fileName
+   * @private
+   */
   private async deleteImageFile(fileName: string): Promise<boolean> {
-    const _id = fileName?.split('/')[-1];
-    const _pub_id = _id?.split('.')[0];
-    return await this.cloudinaryService.deleteFile(_pub_id);
+    const _id : string = fileName?.split('/')[-1];
+    const _pub_id : string = _id?.split('.')[0];
+    return await deleteFile(_pub_id);
   }
 }

@@ -9,4 +9,3 @@ export type AttendanceType = {
   employeeId: string;
 };
 
-export const CLOUDINARY = 'Cloudinary';

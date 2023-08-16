@@ -1,25 +1,29 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword} from '@common';
-import {PrismaService} from '@prisma/prisma.service';
+import {PrismaService} from '@shared/prisma/prisma.service';
 import {CreateAdminInput} from "@admin/dto/admin.input.dto";
 import {LoginAdminInput} from "@admin/dto/login.input.dto";
 import {UpdateAdminInput} from "@admin/dto/update.input.dto";
 import {Ctx} from "@common/context";
 import {ConfigService} from "@nestjs/config";
 import {Admin as AdminModel} from "@prisma/client";
-import {response} from "express";
+import {uploadFile} from "@shared";
+import {FileUpload} from "graphql-upload";
 
 @Injectable()
 export class AdminService {
   constructor(
     private prismaService: PrismaService,
     private readonly jwtService: JwtService,
-    // private cloudinaryService: CloudinaryService,
     private readonly configService: ConfigService,
   ) { }
 
-  /// create an admin
+  /**
+   * create admin
+   * @param createAdminInput
+   * @param context
+   */
   async register(createAdminInput: CreateAdminInput, context: Ctx): Promise<AdminModel> {
     // check if email already exists
     const emailExists = await this.prismaService.admin.findUnique({
@@ -54,7 +58,11 @@ export class AdminService {
     return this.exclude(admin, ['password', 'salt']);
   }
 
-  // log in admin
+  /**
+   * login admin
+   * @param loginAdminInput
+   * @param context
+   */
   async loginAdmin(loginAdminInput: LoginAdminInput, context: Ctx): Promise<AdminModel> {
     const admin = await this.findOne(
         loginAdminInput.email,
@@ -69,14 +77,19 @@ export class AdminService {
     return this.exclude(admin, ['password', 'salt']);
   }
 
-  // get all customers
+  /**
+   * get all admins
+   */
   async getAdmins(): Promise<AdminModel[]> {
     const _admins:AdminModel[] = await this.prismaService.admin.findMany();
     _admins.forEach((_admin:AdminModel) => this.exclude(_admin, ['password', 'salt']));
     return _admins;
   }
 
-  // get user profile
+  /**
+   * get admin profile
+   * @param id
+   */
   async getProfile(id: string): Promise<AdminModel> {
     const _admin = await this.prismaService.admin.findUnique({where: {id: id}});
     if (!_admin) {
@@ -85,7 +98,11 @@ export class AdminService {
     return this.exclude(_admin, ['password', 'salt']);
   }
 
-  // update client profile
+  /**
+   * update admin profile
+   * @param id
+   * @param updateAdminInput
+   */
   async updateProfile(
     id: string,
     updateAdminInput: UpdateAdminInput,
@@ -115,28 +132,36 @@ export class AdminService {
     return this.exclude(updated, ['password', 'salt']);
   }
 
-  /// update the avatar of customer
-  // async updateAvatar(id: string, file: Express.Multer.File): Promise<boolean> {
-  //   const _uploadFile = await this.cloudinaryService.uploadFile(
-  //     file,
-  //     'dynasty/admin/avatar',
-  //     `${file.originalname?.split('.')[0]}`,
-  //   );
-  //
-  //   const _admin = await this.prismaService.admin.update({
-  //     where: {
-  //       id: id,
-  //     },
-  //     data: {
-  //       avatar: _uploadFile,
-  //     },
-  //   });
-  //   return !!_admin;
-  // }
+  /**
+   * update admin avatar
+   * @param id
+   * @param file
+   */
+  async updateAvatar(id: string, file: FileUpload): Promise<boolean> {
+    const _uploadFile = await uploadFile(
+        file,
+        `${file.filename?.split('.')[0]}`,
+        'dynasty/admin/avatar',
+        'dynasty_admin_avatar'
+    );
 
-  /// delete the customer avatar
+    const _admin: AdminModel = await this.prismaService.admin.update({
+      where: {
+        id: id,
+      },
+      data: {
+        avatar: _uploadFile,
+      },
+    });
+    return !!_admin;
+  }
+
+  /**
+   * delete admin avatar
+   * @param id
+   */
   async deleteAvatar(id: string): Promise<boolean> {
-    const saved = await this.prismaService.admin.update({
+    const saved : AdminModel = await this.prismaService.admin.update({
       where: { id: id },
       data: {
         avatar:
@@ -146,9 +171,12 @@ export class AdminService {
     return !!saved;
   }
 
-  // delete client data from database
+  /**
+   * delete admin data
+   * @param id
+   */
   async deleteAdminData(id: string): Promise<boolean> {
-    const _admin = await this.prismaService.admin.delete({
+    const _admin: AdminModel = await this.prismaService.admin.delete({
       where: { id: id },
     });
     return !!_admin;
@@ -160,12 +188,17 @@ export class AdminService {
    * -------------------------------------------------------
    * */
 
-  // find one client (user)
+  /**
+   * Find a user by email and password
+   * @param email
+   * @param password
+   * @private
+   */
   private async findOne(
     email: string,
     password: string,
   ): Promise<AdminModel> {
-    const admin = await this.prismaService.admin.findUnique({
+    const admin: AdminModel = await this.prismaService.admin.findUnique({
       where: {
         email: email,
       },
@@ -181,7 +214,12 @@ export class AdminService {
     return this.exclude(admin, ['password', 'salt']);
   }
 
-  /// Exclude keys from user
+  /**
+   * Exclude the given keys from the user object
+   * @param user
+   * @param keys
+   * @private
+   */
   private exclude<AdminModel, Key extends keyof AdminModel>(
     user: AdminModel,
     keys: Key[],

@@ -7,7 +7,7 @@ export class GqlExceptionFilter implements ExceptionFilter {
         const gqlHost = GqlArgumentsHost.create(host);
         const ctx = gqlHost.getContext();
 
-        // console.log('GqlExceptionFilter', exception);
+        // console.log('GqlExceptionFilter', filter);
 
         // Customize your error response as needed
         ctx.res?.status(exception.getStatus()).json({

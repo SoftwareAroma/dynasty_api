@@ -4,23 +4,29 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import {graphqlUploadExpress} from "graphql-upload";
 
 /*
- * ######################################################
- * ############### BOOTSTRAP THE APP ####################
- * ######################################################
+ * The main function that bootstraps the app
+ * takes no arguments and returns void
+ * It creates an instance of the Nest application
  * */
 const bootstrap = async (): Promise<void> => {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // 'log' // remove log to disable logging
   });
-  // app config service
+  // app environment service
   const configService = app.get(ConfigService);
   app.enableShutdownHooks();
-  // global prefix
-  app.setGlobalPrefix('api');
-  // enable CORS
+
+  /// graphql file upload
+  app.use(
+      '/graphql',
+      graphqlUploadExpress({ maxFileSize: 50000000, maxFiles: 10 }),
+  );
+
+  /// enable CORS
   app.enableCors({
     origin: "*",
       credentials: true,
@@ -30,12 +36,8 @@ const bootstrap = async (): Promise<void> => {
 
   /// middlewares
   app.use(cookieParser());
-  /// APP VERSIONING
-  app.enableVersioning({
-    type: VersioningType.URI,
-  });
 
-  /* USE HELMET TO ADD A SECURITY LAYER */
+  /// USE HELMET TO ADD A SECURITY LAYER
   app.use(
     helmet({
       contentSecurityPolicy: false,
@@ -43,14 +45,10 @@ const bootstrap = async (): Promise<void> => {
     }),
   );
 
-  /*
-   * ###########################################################
-   * #################### USE GLOBAL PIPES #####################
-   * ###########################################################
-   * */
+  /// Validation pipe
   app.useGlobalPipes(new ValidationPipe());
 
-  // get the port from the config file
+  /// get the port from the environment file
   const port = configService.get<number>('PORT');
   await app
     .listen(port)
