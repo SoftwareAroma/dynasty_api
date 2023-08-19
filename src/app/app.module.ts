@@ -3,14 +3,13 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import configuration, {JwtStrategy} from '@common';
 import { AdminModule } from '@admin/admin.module';
-import { ThrottlerModule } from '@nestjs/throttler';
+import {ThrottlerModule} from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
 import { ProductModule } from '@product/product.module';
 import { PrismaModule } from '@shared/prisma/prisma.module';
-import { CloudinaryModule } from '@shared/cloudinary/cloudinary.module';
 import Joi from 'joi';
 import { EmployeeModule } from '@employee/employee.module';
-import { APP_FILTER } from '@nestjs/core';
+import {APP_FILTER} from '@nestjs/core';
 import { AppResolver } from './app.resolver';
 import {GraphQLModule} from "@nestjs/graphql";
 import {ApolloDriver} from "@nestjs/apollo";
@@ -31,13 +30,11 @@ import {
 
     // prisma for database query and connection
     PrismaModule,
-    //Cloudinary Module for file upload and retrieval
-    CloudinaryModule,
 
     /// prevent brute force attack
     ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 10,
+      ttl: 1000 * 60 * 60,
+      limit: 100,
     }),
 
     /// GRAPHQL MODULE CONFIGURATION
