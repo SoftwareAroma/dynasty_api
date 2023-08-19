@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@shared/prisma/prisma.service';
-import { CloudinaryService } from '@shared/cloudinary/cloudinary.service';
 import {
   Employee as EmployeeModel,
   Attendance as AttendanceModel,
@@ -9,17 +8,19 @@ import {CreateEmployeeInput} from "@employee/dto/employee.input.dto";
 import {UpdateEmployeeInput} from "@employee/dto/update.input.dto";
 import {CreateAttendanceInput} from "@employee/dto/attendance.input.dto";
 import {UpdateAttendanceInput} from "@employee/dto/attendance.update.dto";
+import {uploadFile} from "@shared";
+import {FileUpload} from "graphql-upload";
+import {async} from "rxjs";
 
 @Injectable()
 export class EmployeeService {
   constructor(
     private prismaService: PrismaService,
-    private cloudinaryService: CloudinaryService,
   ) { }
 
   async createEmployee(
     employeeInput: CreateEmployeeInput,
-    file?: Express.Multer.File,
+    file?: FileUpload,
   ): Promise<EmployeeModel> {
     const _employee : EmployeeModel = await this.prismaService.employee.create({
       data: employeeInput,
@@ -33,14 +34,15 @@ export class EmployeeService {
   /// update the avatar of customer
   async updateEmployeeAvatar(
     id: string,
-    file: Express.Multer.File,
+    file: FileUpload,
   ): Promise<boolean> {
-    const _uploadFile = await this.cloudinaryService.uploadFile(
+    const _uploadFile = await uploadFile(
       file,
+      `${file.filename?.split('.')[0]}`,
       'dynasty/customer/avatar',
-      `${file.originalname?.split('.')[0]}`,
+        'employee_avatar'
     );
-    const _customer = await this.prismaService.customer.update({
+    const _employee : EmployeeModel = await this.prismaService.employee.update({
       where: {
         id: id,
       },
@@ -48,19 +50,19 @@ export class EmployeeService {
         avatar: _uploadFile,
       },
     });
-    return !!_customer;
+    return !!_employee;
   }
 
   /// delete the customer avatar
   async deleteEmployeeAvatar(id: string): Promise<boolean> {
-    const _customer = await this.prismaService.customer.findUnique({
+    const _customer : EmployeeModel = await this.prismaService.employee.findUnique({
       where: { id: id },
     });
     if (_customer != null) {
       _customer.avatar =
         'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
     }
-    const saved = await this.prismaService.customer.update({
+    const saved: EmployeeModel = await this.prismaService.employee.update({
       where: { id: id },
       data: {
         avatar: _customer.avatar,
@@ -98,7 +100,7 @@ export class EmployeeService {
   }
 
   async deleteEmployee(id: string): Promise<boolean> {
-    const _deleted = await this.prismaService.employee.delete({
+    const _deleted: EmployeeModel = await this.prismaService.employee.delete({
       where: { id: id },
     });
     return !!_deleted;
@@ -144,8 +146,8 @@ export class EmployeeService {
   }
 
   // get all attendance
-  async getAttendance(): Promise<Array<AttendanceModel>> {
-    const _attendance = await this.prismaService.attendance.findMany({
+  async getAttendance(): Promise<AttendanceModel[]> {
+    const _attendance: AttendanceModel[] = await this.prismaService.attendance.findMany({
       include: {
         employee: true,
       },

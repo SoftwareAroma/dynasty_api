@@ -3,7 +3,6 @@ export {
   hashPassword,
   comparePassword,
   generateSalt,
-  // storage,
 } from './functions/common.function';
 
 export { Role, Action } from './enums';

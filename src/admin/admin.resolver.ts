@@ -2,7 +2,6 @@ import {Args, Context, Mutation, Query, Resolver} from '@nestjs/graphql';
 import {AdminService} from "@admin/admin.service";
 import {GAdmin} from "@admin/models/admin.model";
 import {CreateAdminInput} from "@admin/dto/admin.input.dto";
-import {Ctx,} from "@common/context";
 import {UpdateAdminInput} from "@admin/dto/update.input.dto";
 import {IAdmin} from "@admin/interface/admin.interface";
 import {Admin as AdminModel} from "@prisma/client";
@@ -15,7 +14,8 @@ import {
     ReadAdminPolicyHandler,
     UpdateAdminPolicyHandler
 } from "@shared/casl/handler/policy.handler";
-import {FileUpload, GraphQLUpload} from 'graphql-upload';
+import {Ctx} from "@common/context";
+import {GraphQLUpload} from "graphql-upload";
 
 @Resolver(() => GAdmin)
 export class AdminResolver {
@@ -94,7 +94,7 @@ export class AdminResolver {
     @CheckPolicies(new UpdateAdminPolicyHandler())
     async updateAdminAvatar(
         @Args('id') id: string,
-        @Args('avatar', { type: () => GraphQLUpload }) avatar: FileUpload,
+        @Args('avatar', { type: () => GraphQLUpload }) avatar: any,
     ): Promise<boolean> {
         return await this.adminService.updateAvatar(id, avatar);
     }
@@ -107,7 +107,7 @@ export class AdminResolver {
     @Mutation(() => Boolean, {name: "deleteAdminAvatar"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateAdminPolicyHandler())
-    async deleteAvatar(
+    async deleteAdminAvatar(
         @Args('id') id: string,
     ): Promise<boolean> {
         return await this.adminService.deleteAvatar(id);

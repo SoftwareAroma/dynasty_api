@@ -8,8 +8,9 @@ import {UpdateAdminInput} from "@admin/dto/update.input.dto";
 import {Ctx} from "@common/context";
 import {ConfigService} from "@nestjs/config";
 import {Admin as AdminModel} from "@prisma/client";
-import {uploadFile} from "@shared";
+import {deleteFile, uploadFile} from "@shared";
 import {FileUpload} from "graphql-upload";
+import * as url from "url";
 
 @Injectable()
 export class AdminService {
@@ -138,12 +139,15 @@ export class AdminService {
    * @param file
    */
   async updateAvatar(id: string, file: FileUpload): Promise<boolean> {
+    // console.log(`File name > ${file.filename?.split('.')[0]}`);
     const _uploadFile = await uploadFile(
         file,
         `${file.filename?.split('.')[0]}`,
         'dynasty/admin/avatar',
         'dynasty_admin_avatar'
     );
+
+    // console.log(`public id > ${_uploadFile}`);
 
     const _admin: AdminModel = await this.prismaService.admin.update({
       where: {
@@ -161,6 +165,19 @@ export class AdminService {
    * @param id
    */
   async deleteAvatar(id: string): Promise<boolean> {
+    const _admin: AdminModel = await this.prismaService.admin.findUnique({
+        where: { id: id },
+    });
+    if (!_admin) {
+        throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
+    }
+    const url : URL = new URL(_admin.avatar);
+    const pathnameParts : string[] = url.pathname.split('/');
+    const publicId : string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
+
+    // console.log(publicId);
+    await deleteFile(publicId);
+
     const saved : AdminModel = await this.prismaService.admin.update({
       where: { id: id },
       data: {
@@ -176,6 +193,18 @@ export class AdminService {
    * @param id
    */
   async deleteAdminData(id: string): Promise<boolean> {
+    const _adminData: AdminModel = await this.prismaService.admin.findUnique({
+      where: { id: id },
+    });
+    if (!_adminData) {
+      throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
+    }
+    const url : URL = new URL(_adminData.avatar);
+    const pathnameParts : string[] = url.pathname.split('/');
+    const publicId : string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
+
+    // console.log(publicId);
+    await deleteFile(publicId);
     const _admin: AdminModel = await this.prismaService.admin.delete({
       where: { id: id },
     });

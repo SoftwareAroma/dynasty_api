@@ -3,7 +3,7 @@ import {Product as ProductModel} from '@prisma/client';
 import {PrismaService} from '@shared/prisma/prisma.service';
 import {CreateProductInput} from "@product/dto/product.input.dto";
 import {UpdateProductInput} from "@product/dto/update.input.dto";
-import {deleteFile, uploadFile} from "@shared";
+import {deleteFile, uploadFile, uploadFiles} from "@shared";
 import {FileUpload} from "graphql-upload";
 
 @Injectable()
@@ -13,35 +13,27 @@ export class ProductService {
   ) { }
 
   /**
-   * create a new product
-   * @param createProductDto
-   * @param files
-   */
-  async createProduct(
-    createProductDto: CreateProductInput,
-    files?: Array<FileUpload>,
-  ): Promise<ProductModel> {
-    if(files.length > 0){
-      const _images : any[] = [];
-      for (const image of files) {
-        // console.log("data ", files);
-        const _fileUrl : string = await uploadFile(
-            image,
-            `${image.filename?.split('.')[0]}`,
-            'dynasty/products',
-            'dynasty_product_image'
-        );
-        _images.push(_fileUrl);
+     * create a new product
+     * @param createProductDto
+     * @param files
+     */
+    async createProduct(
+      createProductDto: CreateProductInput,
+      files?: Array<FileUpload>,
+    ): Promise<ProductModel> {
+      if (files && files.length > 0) {
+        const public_ids: string[] = files?.map((file: FileUpload) => {
+          const fileName: string = file.filename;
+          return fileName.replace(/\.[^/.]+$/, "");
+        });
+        createProductDto.images = await uploadFiles(files, public_ids, 'dynasty_product_image');
       }
-      createProductDto.images = _images;
+      createProductDto.price.amount = Number(createProductDto.price.amount);
+      console.log("Product >>>>", createProductDto.images);
+      return this.prismaService.product.create({
+        data: createProductDto,
+      });
     }
-    createProductDto.price.amount = Number(createProductDto.price.amount);
-    // console.log("Product >>>>", createProductDto.images);
-    // console.log("Product >>>>", newProduct.id);
-    return this.prismaService.product.create({
-      data: createProductDto,
-    });
-  }
 
   /**
    * get all products

@@ -11,7 +11,7 @@ import {UpdateCustomerInput} from "@customer/dto/update.input.dto";
 import {CreateCartInput} from "@customer/dto/cart.input.dto";
 import {UpdateCartInput} from "@customer/dto/cart.update.dto";
 import {FileUpload} from "graphql-upload";
-import {uploadFile} from "@shared";
+import {deleteFile, uploadFile} from "@shared";
 
 @Injectable()
 export class CustomerService {
@@ -89,27 +89,7 @@ export class CustomerService {
     });
     return this.exclude(customer, ['password', 'salt']);
   }
-
-  // validate customer
-  // async validateCustomer(
-  //   loginCustomerDto: LoginCustomerInput,
-  // ): Promise<CustomerModel> {
-  //   const customer = await this.prismaService.customer.findUnique({
-  //     where: { email: loginCustomerDto.email },
-  //   });
-  //   if (!customer) {
-  //     return undefined;
-  //   }
-  //   // compare passwords
-  //   const isPasswordValid = await comparePassword(loginCustomerDto.password, customer.password);
-  //   if (!isPasswordValid) {
-  //     return null;
-  //   }
-  //   if (!customer) {
-  //     return undefined;
-  //   }
-  //   return customer;
-  // }
+  
 
   /**
    * get customer by id
@@ -206,12 +186,15 @@ export class CustomerService {
    * @param file
    */
   async updateAvatar(id: string, file: FileUpload): Promise<boolean> {
+    // console.log(`File name > ${file.filename?.split('.')[0]}`);
     const _uploadFile = await uploadFile(
-      file,
-      `${file.filename?.split('.')[0]}`,
-      'dynasty/customer/avatar',
+        file,
+        `${file.filename?.split('.')[0]}`,
+        'dynasty/customer/avatar',
         'dynasty_customer_avatar'
     );
+
+    // console.log(`public id > ${_uploadFile}`);
     const _customer : CustomerModel = await this.prismaService.customer.update({
       where: {
         id: id,
@@ -228,17 +211,24 @@ export class CustomerService {
    * @param id
    */
   async deleteAvatar(id: string): Promise<boolean> {
-    const _customer = await this.prismaService.customer.findUnique({
+    const _customer: CustomerModel = await this.prismaService.customer.findUnique({
       where: { id: id },
     });
-    if (_customer != null) {
-      _customer.avatar =
-        'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+    if (!_customer) {
+      throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
     }
-    const saved = await this.prismaService.customer.update({
+    const url : URL = new URL(_customer.avatar);
+    const pathnameParts : string[] = url.pathname.split('/');
+    const publicId : string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
+
+    // console.log(publicId);
+    await deleteFile(publicId);
+
+    const saved : CustomerModel = await this.prismaService.customer.update({
       where: { id: id },
       data: {
-        avatar: _customer.avatar,
+        avatar:
+            'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
       },
     });
     return !!saved;
@@ -249,7 +239,19 @@ export class CustomerService {
    * @param id
    */
   async deleteCustomerData(id: string): Promise<boolean> {
-    const _customer = await this.prismaService.customer.delete({
+    const _customerData: CustomerModel = await this.prismaService.customer.findUnique({
+      where: { id: id },
+    });
+    if (!_customerData) {
+      throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
+    }
+    const url : URL = new URL(_customerData.avatar);
+    const pathnameParts : string[] = url.pathname.split('/');
+    const publicId : string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
+
+    // console.log(publicId);
+    await deleteFile(publicId);
+    const _customer : CustomerModel = await this.prismaService.customer.delete({
       where: { id: id },
     });
     return !!_customer;
