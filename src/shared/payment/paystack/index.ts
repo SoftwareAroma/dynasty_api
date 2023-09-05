@@ -1,5 +1,5 @@
 export const payStack = {
-    initialize: () => {
-        console.log('Initializing Paystack');
+    initialize: () : void => {
+        console.log('Initializing PayStack');
     }
 }

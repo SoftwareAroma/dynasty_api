@@ -38,10 +38,12 @@ export class ProductResolver {
     @CheckPolicies(new CreateProductPolicyHandler())
     async createProduct(
         @Args('createProductInput') createProductInput: CreateProductInput,
-        @Args('files', { type: () => GraphQLUpload }) files: Array<FileUpload>,
+        @Args('files', { type: () => [GraphQLUpload] }) files: Array<Promise<FileUpload>>,
     ): Promise<IProduct> {
-        const _productDto = this.formatInput(createProductInput);
-        const product : ProductModel = await this.productService.createProduct(_productDto, files);
+        const resolvedFiles: FileUpload[] = await Promise.all(files); // Wait for all promises to resolve
+        // console.log(resolvedFiles)
+        // const _productDto = this.formatInput(createProductInput);
+        const product : ProductModel = await this.productService.createProduct(createProductInput, resolvedFiles);
         await pubSub.publish('productCreated', { productCreated: product });
         return product;
     }
@@ -86,8 +88,8 @@ export class ProductResolver {
         @Args('files', { type: () => GraphQLUpload }) files: Array<FileUpload>,
         @Args('updateProductInput') updateProductInput: UpdateProductInput,
     ): Promise<IProduct> {
-        const _productDto = this.formatInput(updateProductInput);
-        const product: ProductModel = await this.productService.updateProduct(id, _productDto, files);
+        // const _productDto = this.formatInput(updateProductInput);
+        const product: ProductModel = await this.productService.updateProduct(id, updateProductInput, files);
         await pubSub.publish('productUpdated', { productUpdated: product });
         return product;
     }

@@ -12,7 +12,7 @@ import {CheckPolicies, PoliciesGuard} from "@common";
 import {
     ReadCustomerPolicyHandler,
     UpdateCustomerPolicyHandler,
-    DeleteCustomerPolicyHandler, UpdateAdminPolicyHandler,
+    DeleteCustomerPolicyHandler,
 } from "@shared/casl/handler/policy.handler";
 import {CreateCartInput} from "@customer/dto/cart.input.dto";
 import {UpdateCartInput} from "@customer/dto/cart.update.dto";
@@ -86,10 +86,10 @@ export class CustomerResolver {
     }
 
     /// update customer -> delete avatar
-    @Mutation(() => Boolean, {name: "deleteAvatar"})
+    @Mutation(() => Boolean, {name: "deleteCustomerAvatar"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateCustomerPolicyHandler())
-    async deleteAvatar(
+    async deleteCustomerAvatar(
         @Args('id') id: string,
     ): Promise<boolean> {
         const _customer : boolean = await this.customerService.deleteAvatar(id);

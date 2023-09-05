@@ -12,13 +12,12 @@ import {UseGuards} from "@nestjs/common";
 import {GqlAuthGuard} from "@common/guards";
 import {CheckPolicies, PoliciesGuard} from "@common";
 import {
-    CreateEmployeePolicyHandler,
-    DeleteEmployeePolicyHandler, ReadAttendancePolicyHandler,
-    ReadEmployeePolicyHandler,
+    DeleteEmployeePolicyHandler, UpdateCustomerPolicyHandler,
     UpdateEmployeePolicyHandler,
 } from "@shared/casl/handler/policy.handler";
 import {PubSub} from "graphql-subscriptions";
 import {Employee as EmployeeModel} from "@prisma/client";
+import {FileUpload, GraphQLUpload} from "graphql-upload";
 
 /// pub sub
 const pubSub : PubSub = new PubSub();
@@ -31,8 +30,8 @@ export class EmployeeResolver {
 
     /// create employee
     @Mutation(() => GEmployee, {name: 'createEmployee'})
-    @UseGuards(GqlAuthGuard, PoliciesGuard)
-    @CheckPolicies(new CreateEmployeePolicyHandler())
+    // @UseGuards(GqlAuthGuard, PoliciesGuard)
+    // @CheckPolicies(new CreateEmployeePolicyHandler())
     async createEmployee(
         @Args('createEmployeeInput') createEmployeeInput: CreateEmployeeInput,
     ) : Promise<IEmployee> {
@@ -41,16 +40,12 @@ export class EmployeeResolver {
 
     /// get employees
     @Query(() => GEmployee, {name: 'getEmployees'})
-    @UseGuards(GqlAuthGuard, PoliciesGuard)
-    @CheckPolicies(new ReadEmployeePolicyHandler())
     async getEmployees() : Promise<IEmployee[]> {
         return await this.employeeService.getEmployees();
     }
 
     /// get employee
     @Query(() => GEmployee, {name: 'getEmployee'})
-    @UseGuards(GqlAuthGuard, PoliciesGuard)
-    @CheckPolicies(new ReadEmployeePolicyHandler())
     async getEmployee(
         @Args('id') id: string,
     ) : Promise<IEmployee> {
@@ -70,10 +65,33 @@ export class EmployeeResolver {
         return employee;
     }
 
-    /// clock in employee
-    @Mutation(() => GEmployee, {name: 'createAttendance'})
+    /// update avatar
+    @Mutation(() => Boolean, {name: 'updateEmployeeAvatar'})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateEmployeePolicyHandler())
+    async updateEmployeeAvatar(
+        @Args('id') id: string,
+        @Args('avatar', { type: () => GraphQLUpload }) avatar: FileUpload,
+    ): Promise<boolean> {
+        const _employee : boolean = await this.employeeService.updateEmployeeAvatar(id, avatar);
+        await pubSub.publish('employeeAvatarUpdated', {userUpdated: _employee});
+        return _employee;
+    }
+
+    /// update customer -> delete avatar
+    @Mutation(() => Boolean, {name: "deleteEmployeeAvatar"})
+    @UseGuards(GqlAuthGuard, PoliciesGuard)
+    @CheckPolicies(new UpdateCustomerPolicyHandler())
+    async deleteAvatar(
+        @Args('id') id: string,
+    ): Promise<boolean> {
+        const _employee : boolean = await this.employeeService.deleteEmployeeAvatar(id);
+        await pubSub.publish('employeeAvatarUpdated', {userUpdated: _employee});
+        return _employee;
+    }
+
+    /// clock in employee
+    @Mutation(() => GEmployee, {name: 'createAttendance'})
     async clockInEmployee(
         @Args('id') id: string,
         @Args('clockInInput') clockInInput: CreateAttendanceInput,
@@ -85,8 +103,6 @@ export class EmployeeResolver {
 
     /// clock out employee
     @Mutation(() => GEmployee, {name: 'updateAttendance'})
-    @UseGuards(GqlAuthGuard, PoliciesGuard)
-    @CheckPolicies(new UpdateEmployeePolicyHandler())
     async clockOutEmployee(
         @Args('employeeId') employeeId: string,
         @Args('attendanceId') attendanceId: string,
@@ -99,16 +115,12 @@ export class EmployeeResolver {
 
     /// get attendance
     @Query(() => GAttendance, {name: 'getAllAttendance'})
-    @UseGuards(GqlAuthGuard, PoliciesGuard)
-    @CheckPolicies(new ReadAttendancePolicyHandler())
     async getAllAttendance() : Promise<IAttendance[]> {
         return await this.employeeService.getAttendance();
     }
 
     /// get attendance by id
     @Query(() => GAttendance, {name: 'getAttendance'})
-    @UseGuards(GqlAuthGuard, PoliciesGuard)
-    @CheckPolicies(new ReadAttendancePolicyHandler())
     async getAttendance(
         @Args('id') id: string,
     ) : Promise<IAttendance> {

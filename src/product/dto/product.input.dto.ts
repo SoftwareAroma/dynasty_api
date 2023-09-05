@@ -1,4 +1,4 @@
-import {InputType, Field, Int} from '@nestjs/graphql';
+import {InputType, Field, Int, Float} from '@nestjs/graphql';
 import {PriceType} from "@common";
 import GraphQLJSON from "graphql-type-json";
 
@@ -22,16 +22,10 @@ export class CreateProductInput {
     @Field()
     category: string;
 
-    @Field(() => [String], { nullable: true })
-    cart: string[];
-
-    @Field({ nullable: true })
-    cartId?: string;
-
     @Field({ nullable: true })
     brand?: string;
 
-    @Field(() => Int, { nullable: true, defaultValue: 0 })
+    @Field(() => Float, { nullable: true, defaultValue: 0 })
     rating?: number;
 
     @Field(() => Int, { nullable: true, defaultValue: 0 })

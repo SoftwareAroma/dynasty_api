@@ -1,16 +1,15 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {JwtService} from '@nestjs/jwt';
-import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword} from '@common';
-import {PrismaService} from '@shared/prisma/prisma.service';
-import {CreateAdminInput} from "@admin/dto/admin.input.dto";
-import {LoginAdminInput} from "@admin/dto/login.input.dto";
-import {UpdateAdminInput} from "@admin/dto/update.input.dto";
-import {Ctx} from "@common/context";
-import {ConfigService} from "@nestjs/config";
-import {Admin as AdminModel} from "@prisma/client";
-import {deleteFile, uploadFile} from "@shared";
-import {FileUpload} from "graphql-upload";
-import * as url from "url";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword } from '@common';
+import { PrismaService } from '@shared/prisma/prisma.service';
+import { CreateAdminInput } from "@admin/dto/admin.input.dto";
+import { LoginAdminInput } from "@admin/dto/login.input.dto";
+import { UpdateAdminInput } from "@admin/dto/update.input.dto";
+import { Ctx } from "@common/context";
+import { ConfigService } from "@nestjs/config";
+import { Admin as AdminModel } from "@prisma/client";
+import { deleteFile, uploadFile } from "@shared";
+import { FileUpload } from "graphql-upload";
 
 @Injectable()
 export class AdminService {
@@ -23,9 +22,8 @@ export class AdminService {
   /**
    * create admin
    * @param createAdminInput
-   * @param context
    */
-  async register(createAdminInput: CreateAdminInput, context: Ctx): Promise<AdminModel> {
+  async register(createAdminInput: CreateAdminInput): Promise<AdminModel> {
     // check if email already exists
     const emailExists = await this.prismaService.admin.findUnique({
       where: { email: createAdminInput.email },
@@ -37,7 +35,7 @@ export class AdminService {
     if (createAdminInput.userName == null) {
       createAdminInput.userName = `${createAdminInput.firstName}`;
     }
-    if(createAdminInput.password != null && createAdminInput.password?.length < 6) {
+    if (createAdminInput.password != null && createAdminInput.password?.length < 6) {
       throw new HttpException('Password must be at least 6 characters', HttpStatus.BAD_REQUEST);
     }
     // generate salt
@@ -45,16 +43,8 @@ export class AdminService {
     // hash password add the hashed password to the Input
     createAdminInput.password = await hashPassword(createAdminInput.password, createAdminInput.salt);
     // create a new user
-    const admin:AdminModel = await this.prismaService.admin.create({
+    const admin: AdminModel = await this.prismaService.admin.create({
       data: createAdminInput,
-    });
-    // generate a token
-    const payload = { sub: admin.id, username: admin.email, role: admin.role  };
-    const token = await this.jwtService.signAsync(payload);
-    /// set cookie
-    context.res.cookie('access_token', token, {
-      domain: this.configService.get<string>('DOMAIN'),
-      httpOnly: true,
     });
     return this.exclude(admin, ['password', 'salt']);
   }
@@ -62,19 +52,13 @@ export class AdminService {
   /**
    * login admin
    * @param loginAdminInput
-   * @param context
    */
-  async loginAdmin(loginAdminInput: LoginAdminInput, context: Ctx): Promise<AdminModel> {
+  async loginAdmin(loginAdminInput: LoginAdminInput): Promise<AdminModel> {
     const admin = await this.findOne(
-        loginAdminInput.email,
-        loginAdminInput.password,
+      loginAdminInput.email,
+      loginAdminInput.password,
     );
-    const payload = { username: admin.email, sub: admin.id, role: admin.role };
-    const token = await this.jwtService.signAsync(payload);
-    context.res.cookie('access_token', token, {
-      domain: this.configService.get<string>('DOMAIN'),
-      httpOnly: true,
-    });
+    // log the response cookie
     return this.exclude(admin, ['password', 'salt']);
   }
 
@@ -82,8 +66,8 @@ export class AdminService {
    * get all admins
    */
   async getAdmins(): Promise<AdminModel[]> {
-    const _admins:AdminModel[] = await this.prismaService.admin.findMany();
-    _admins.forEach((_admin:AdminModel) => this.exclude(_admin, ['password', 'salt']));
+    const _admins: AdminModel[] = await this.prismaService.admin.findMany();
+    _admins.forEach((_admin: AdminModel) => this.exclude(_admin, ['password', 'salt']));
     return _admins;
   }
 
@@ -92,7 +76,7 @@ export class AdminService {
    * @param id
    */
   async getProfile(id: string): Promise<AdminModel> {
-    const _admin = await this.prismaService.admin.findUnique({where: {id: id}});
+    const _admin = await this.prismaService.admin.findUnique({ where: { id: id } });
     if (!_admin) {
       throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
     }
@@ -116,18 +100,18 @@ export class AdminService {
     if (!_admin) {
       throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
     }
-    if(updateAdminInput.password != null && updateAdminInput.password?.length < 6) {
+    if (updateAdminInput.password != null && updateAdminInput.password?.length < 6) {
       throw new HttpException('Password must be at least 6 characters', HttpStatus.BAD_REQUEST);
     }
     // if password is not '' then update the password as well
     if (updateAdminInput.password?.length >= 6) {
       updateAdminInput.password = await hashPassword(
-          updateAdminInput.password,
-          _admin.salt,
+        updateAdminInput.password,
+        _admin.salt,
       );
     }
     const updated = await this.prismaService.admin.update({
-      where: {id: id},
+      where: { id: id },
       data: updateAdminInput,
     });
     return this.exclude(updated, ['password', 'salt']);
@@ -141,10 +125,10 @@ export class AdminService {
   async updateAvatar(id: string, file: FileUpload): Promise<boolean> {
     // console.log(`File name > ${file.filename?.split('.')[0]}`);
     const _uploadFile = await uploadFile(
-        file,
-        `${file.filename?.split('.')[0]}`,
-        'dynasty/admin/avatar',
-        'dynasty_admin_avatar'
+      file,
+      `${file.filename?.split('.')[0]}`,
+      'dynasty/admin/avatar',
+      'dynasty_admin_avatar'
     );
 
     // console.log(`public id > ${_uploadFile}`);
@@ -166,19 +150,19 @@ export class AdminService {
    */
   async deleteAvatar(id: string): Promise<boolean> {
     const _admin: AdminModel = await this.prismaService.admin.findUnique({
-        where: { id: id },
+      where: { id: id },
     });
     if (!_admin) {
-        throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
+      throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
     }
-    const url : URL = new URL(_admin.avatar);
-    const pathnameParts : string[] = url.pathname.split('/');
-    const publicId : string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
+    const url: URL = new URL(_admin.avatar);
+    const pathnameParts: string[] = url.pathname.split('/');
+    const publicId: string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
 
     // console.log(publicId);
     await deleteFile(publicId);
 
-    const saved : AdminModel = await this.prismaService.admin.update({
+    const saved: AdminModel = await this.prismaService.admin.update({
       where: { id: id },
       data: {
         avatar:
@@ -199,9 +183,9 @@ export class AdminService {
     if (!_adminData) {
       throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
     }
-    const url : URL = new URL(_adminData.avatar);
-    const pathnameParts : string[] = url.pathname.split('/');
-    const publicId : string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
+    const url: URL = new URL(_adminData.avatar);
+    const pathnameParts: string[] = url.pathname.split('/');
+    const publicId: string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
 
     // console.log(publicId);
     await deleteFile(publicId);
@@ -232,7 +216,7 @@ export class AdminService {
         email: email,
       },
     });
-    if(!admin) {
+    if (!admin) {
       throw new HttpException('No Record found for the this email', HttpStatus.NOT_FOUND);
     }
     // compare passwords

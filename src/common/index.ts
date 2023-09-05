@@ -16,7 +16,7 @@ export {
 
 export { FacebookAuthGuard, GoogleAuthGuard, JwtAuthGuard } from './guards';
 
-export { jwtConstants, PriceType, AttendanceType } from './constants';
+export { PriceType, AttendanceType } from './constants';
 export {JwtStrategy} from './strategy';
 
 export * from './functions/common.function';

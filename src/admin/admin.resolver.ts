@@ -1,59 +1,81 @@
-import {Args, Context, Mutation, Query, Resolver} from '@nestjs/graphql';
-import {AdminService} from "@admin/admin.service";
-import {GAdmin} from "@admin/models/admin.model";
-import {CreateAdminInput} from "@admin/dto/admin.input.dto";
-import {UpdateAdminInput} from "@admin/dto/update.input.dto";
-import {IAdmin} from "@admin/interface/admin.interface";
-import {Admin as AdminModel} from "@prisma/client";
-import {LoginAdminInput} from "@admin/dto/login.input.dto";
-import {UseGuards} from "@nestjs/common";
-import {GqlAuthGuard} from "@common/guards";
-import {CheckPolicies, PoliciesGuard} from "@common";
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { AdminService } from "@admin/admin.service";
+import { GAdmin } from "@admin/models/admin.model";
+import { CreateAdminInput } from "@admin/dto/admin.input.dto";
+import { UpdateAdminInput } from "@admin/dto/update.input.dto";
+import { IAdmin } from "@admin/interface/admin.interface";
+import { Admin as AdminModel } from "@prisma/client";
+import { LoginAdminInput } from "@admin/dto/login.input.dto";
+import { UseGuards } from "@nestjs/common";
+import { GqlAuthGuard } from "@common/guards";
+import { CheckPolicies, PoliciesGuard } from "@common";
 import {
     DeleteAdminPolicyHandler,
     ReadAdminPolicyHandler,
     UpdateAdminPolicyHandler
 } from "@shared/casl/handler/policy.handler";
+import { GraphQLUpload } from "graphql-upload";
+import { Response } from 'express';
+import { JwtService } from '@nestjs/jwt';
 import {Ctx} from "@common/context";
-import {GraphQLUpload} from "graphql-upload";
 
 @Resolver(() => GAdmin)
 export class AdminResolver {
     constructor(
         private readonly adminService: AdminService,
-    ) {}
+        private readonly jwtService: JwtService,
+        // private readonly configService: ConfigService,
+    ) { }
 
     /**
      * create admin
      * @param createAdminInput
-     * @param context
+     * @param response
      */
-    @Mutation(() => GAdmin, {name: "createAdmin"})
+    @Mutation(() => GAdmin, { name: "createAdmin" })
     async createAdmin(
         @Args('createAdminInput') createAdminInput: CreateAdminInput,
-        @Context() context: Ctx,
+        @Context('res') response: Response,
     ): Promise<IAdmin> {
-        return await this.adminService.register(createAdminInput, context);
+        const admin : AdminModel = await this.adminService.register(createAdminInput);
+        const payload = { username: admin.email, sub: admin.id, role: admin.role };
+        const token : string = await this.jwtService.signAsync(payload);
+        response.cookie('access_token', token, {
+            // domain: this.configService.get<string>('DOMAIN'),
+            httpOnly: true,
+            // sameSite: 'none',
+            // secure: true,
+        });
+        return admin;
     }
 
     /**
      * login admin
      * @param loginAdminInput
-     * @param context
+     * @param response
      */
-    @Mutation(() => GAdmin, {name: "loginAdmin"})
+    @Mutation(() => GAdmin, { name: "loginAdmin" })
     async loginAdmin(
         @Args('loginAdminInput') loginAdminInput: LoginAdminInput,
-        @Context() context: Ctx,
+        // @Context() context: Ctx,
+        @Context('res') response: Response,
     ): Promise<AdminModel> {
-        // Your logic for creating an admin goes here
-        return await this.adminService.loginAdmin(loginAdminInput, context);
+        const admin : AdminModel = await this.adminService.loginAdmin(loginAdminInput);
+        const payload = { username: admin.email, sub: admin.id, role: admin.role };
+        const token : string = await this.jwtService.signAsync(payload);
+        response.cookie('access_token', token, {
+            // domain: this.configService.get<string>('DOMAIN'),
+            httpOnly: true,
+            // sameSite: 'none',
+            // secure: true,
+        });
+        return admin;
     }
 
     /**
      * get all admins
      */
-    @Query(() => [GAdmin], {name: "getAdmins"})
+    @Query(() => [GAdmin], { name: "getAdmins" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
     async admins(): Promise<IAdmin[]> {
@@ -64,12 +86,12 @@ export class AdminResolver {
      * get admin profile
      * @param context
      */
-    @Query(() => GAdmin, {name: "getAdminProfile"})
+    @Query(() => GAdmin, { name: "getAdminProfile" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
     async profile(@Context() context: Ctx): Promise<IAdmin> {
         // console.log(context.req.user);
-        const user:any = context.req.user;
+        const user: any = context.req.user;
         return this.adminService.getProfile(user.id);
     }
 
@@ -77,7 +99,7 @@ export class AdminResolver {
      * get admin by id
      * @param id
      */
-    @Query(() => GAdmin, {name: "getAdminById"})
+    @Query(() => GAdmin, { name: "getAdminById" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
     async admin(@Args('id') id: string): Promise<IAdmin> {
@@ -104,7 +126,7 @@ export class AdminResolver {
      * @param id
      *
      */
-    @Mutation(() => Boolean, {name: "deleteAdminAvatar"})
+    @Mutation(() => Boolean, { name: "deleteAdminAvatar" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateAdminPolicyHandler())
     async deleteAdminAvatar(
@@ -118,7 +140,7 @@ export class AdminResolver {
      * @param id
      * @param updateAdminInput
      */
-    @Mutation(() => GAdmin, {name: "updateAdmin"})
+    @Mutation(() => GAdmin, { name: "updateAdmin" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateAdminPolicyHandler())
     async updateAdminProfile(
@@ -133,8 +155,8 @@ export class AdminResolver {
      * logout admin
      * @param context
      */
-    @Query(() => Boolean, {name: "logoutAdmin"})
-    async logoutAdmin(@Context() context:any): Promise<boolean> {
+    @Query(() => Boolean, { name: "logoutAdmin" })
+    async logoutAdmin(@Context() context: any): Promise<boolean> {
         context.res.cookie('access_token', undefined, { maxAge: 1 });
         return true;
     }
@@ -144,12 +166,12 @@ export class AdminResolver {
      * @param id
      * @param context
      */
-    @Mutation(() => Boolean, {name: "deleteAdmin"})
+    @Mutation(() => Boolean, { name: "deleteAdmin" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new DeleteAdminPolicyHandler())
     async deleteAdmin(
         @Args('id') id: string,
-        @Context() context:Ctx,
+        @Context() context: any,
     ): Promise<boolean> {
         context.res.cookie('access_token', undefined, { maxAge: 1 });
         return await this.adminService.deleteAdminData(id);

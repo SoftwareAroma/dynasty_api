@@ -62,7 +62,7 @@ CREATE TABLE "Product" (
     "depo" TEXT NOT NULL,
     "category" TEXT NOT NULL,
     "brand" TEXT DEFAULT 'Custom',
-    "rating" INTEGER DEFAULT 0,
+    "rating" DOUBLE PRECISION DEFAULT 0.0,
     "numReviews" INTEGER DEFAULT 0,
     "numInStock" INTEGER DEFAULT 0,
     "colors" TEXT[] DEFAULT ARRAY[]::TEXT[],
@@ -76,12 +76,12 @@ CREATE TABLE "Product" (
 -- CreateTable
 CREATE TABLE "Employee" (
     "id" TEXT NOT NULL,
+    "email" TEXT,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "phoneNumber" TEXT NOT NULL,
     "designation" TEXT NOT NULL,
     "avatar" TEXT DEFAULT 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
-    "email" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -128,10 +128,10 @@ CREATE UNIQUE INDEX "Employee_email_key" ON "Employee"("email");
 CREATE UNIQUE INDEX "Attendance_id_key" ON "Attendance"("id");
 
 -- AddForeignKey
-ALTER TABLE "Cart" ADD CONSTRAINT "Cart_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Cart" ADD CONSTRAINT "Cart_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Cart" ADD CONSTRAINT "Cart_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Cart" ADD CONSTRAINT "Cart_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Attendance" ADD CONSTRAINT "Attendance_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Attendance" ADD CONSTRAINT "Attendance_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("id") ON DELETE CASCADE ON UPDATE CASCADE;
