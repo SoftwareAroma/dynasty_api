@@ -1,10 +1,10 @@
-import {ObjectType, Field, Int} from '@nestjs/graphql';
+import {ObjectType, Field, Int, Float, ID} from '@nestjs/graphql';
 import {PriceType} from "@common";
 import GraphQLJSON from "graphql-type-json";
 
 @ObjectType()
 export class GProduct {
-    @Field(() => String)
+    @Field(() => ID)
     id: string;
 
     @Field()
@@ -34,7 +34,7 @@ export class GProduct {
     @Field({ nullable: true })
     brand?: string;
 
-    @Field(() => Int, { nullable: true, defaultValue: 0 })
+    @Field(() => Float, { nullable: true, defaultValue: 0.0 })
     rating?: number;
 
     @Field(() => Int, { nullable: true, defaultValue: 0 })

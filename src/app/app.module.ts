@@ -1,24 +1,25 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import configuration, {JwtStrategy} from '@common';
+import configuration from '@common';
 import { AdminModule } from '@admin/admin.module';
-import {ThrottlerModule} from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
 import { ProductModule } from '@product/product.module';
 import { PrismaModule } from '@shared/prisma/prisma.module';
 import Joi from 'joi';
 import { EmployeeModule } from '@employee/employee.module';
-import {APP_FILTER} from '@nestjs/core';
+import { APP_FILTER } from '@nestjs/core';
 import { AppResolver } from './app.resolver';
-import {GraphQLModule} from "@nestjs/graphql";
-import {ApolloDriver} from "@nestjs/apollo";
+import { GraphQLModule } from "@nestjs/graphql";
+import { ApolloDriver } from "@nestjs/apollo";
 import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
 import {
   GqlExceptionFilter,
   HttpExceptionFilter,
   PrismaClientExceptionFilter
 } from "@shared";
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -44,9 +45,10 @@ import {
       subscriptions: {
         'graphql-ws': true
       },
-      autoSchemaFile: true,
-      introspection: true, // Enable introspection
+      // autoSchemaFile: true,
+      autoSchemaFile: join(process.cwd(), 'src/schema/schema.graphql'),
       sortSchema: true,
+      introspection: true, // Enable introspection
       playground: false,
       uploads: false,
       plugins: [
@@ -58,7 +60,7 @@ import {
         credentials: true,
       },
       // add context object for request and response
-      context: ({ req, res }):{req: any, res: any} => {
+      context: ({ req, res }) => {
         return { req, res };
       },
     }),
@@ -84,7 +86,7 @@ import {
   providers: [
     AppService,
     AppResolver,
-    JwtStrategy,
+    // JwtStrategy,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

@@ -1,11 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
-import {graphqlUploadExpress} from "graphql-upload";
+import { graphqlUploadExpress } from "graphql-upload";
+import {DOMAINS, PORT} from "@common";
 
 /*
  * The main function that bootstraps the app
@@ -16,16 +16,15 @@ const bootstrap = async (): Promise<void> => {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // 'log' // remove log to disable logging
   });
-  // app environment service
-  const configService : ConfigService<unknown, boolean> = app.get(ConfigService);
+  /// Enable app hooks
   app.enableShutdownHooks();
 
   /**
    * Enable graphql upload
    */
   app.use(
-      '/graphql',
-      graphqlUploadExpress({ maxFileSize: 50000000, maxFiles: 10 }),
+    '/graphql',
+    graphqlUploadExpress({ maxFileSize: 50000000, maxFiles: 10 }),
   );
 
   /**
@@ -33,7 +32,7 @@ const bootstrap = async (): Promise<void> => {
    * it is not recommended to use the wildcard * for production
    */
   app.enableCors({
-    origin: "*",
+    origin: DOMAINS,
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
@@ -54,17 +53,6 @@ const bootstrap = async (): Promise<void> => {
     }),
   );
 
-  // add csrf protection
-  //   app.use(csurf());
-
-    // app.use((req: any, res: any, next: any) : void  => {
-    //     const token = req.csrfToken();
-    //     res.cookie('XSRF-TOKEN', token);
-    //     res.locals.csrfToken = token;
-    //
-    //     next();
-    // });
-
   /**
    * Enable validation pipe
    */
@@ -73,11 +61,11 @@ const bootstrap = async (): Promise<void> => {
   /**
    * Start the app
    */
-  const port = configService.get<number>('PORT');
+  const port : number = PORT;
   await app
     .listen(port)
     .then((): void => {
-      console.log(`Application started successfully at ${app.getUrl()}`);
+      console.log(`Application started successfully at http://localhost:${port}/`);
       console.log(`Server running on port http://localhost:${port}/graphql`);
       console.log('Press CTRL-C to stop server');
     })

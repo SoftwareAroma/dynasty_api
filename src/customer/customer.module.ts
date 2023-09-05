@@ -2,22 +2,24 @@ import { Module } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from '@common';
 import {CaslModule} from '@shared/casl/casl.module';
 import { CustomerResolver } from './customer.resolver';
+import {CustomerJwtStrategy} from "@common/strategy/customer-jwt.strategy";
+import {JWT_EXPIRES_IN, JWT_SECRET} from "@common";
 
 @Module({
   imports: [
     CaslModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: jwtConstants.expiresIn },
+      secret: JWT_SECRET,
+      signOptions: { expiresIn: JWT_EXPIRES_IN },
     }),
   ],
   providers: [
       CustomerService,
       CustomerResolver,
+      CustomerJwtStrategy,
   ],
   exports: [CustomerService],
 })

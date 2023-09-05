@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {Admin as AdminModel, Customer as CustomerModel} from "@prisma/client";
+import { Admin as AdminModel, Customer as CustomerModel } from "@prisma/client";
 
 type Ctx = {
     req: Request & {

@@ -29,9 +29,10 @@ export class ProductService {
         createProductDto.images = await uploadFiles(files, public_ids, 'dynasty_product_image');
       }
       createProductDto.price.amount = Number(createProductDto.price.amount);
-      console.log("Product >>>>", createProductDto.images);
+      // console.log("Product >>>>", createProductDto.images);
       return this.prismaService.product.create({
         data: createProductDto,
+        include: {cart: true},
       });
     }
 
@@ -75,7 +76,7 @@ export class ProductService {
   async updateProduct(
     id: string,
     updateProductDto: UpdateProductInput,
-    files?: Array<FileUpload>,
+    files?: FileUpload[],
   ): Promise<ProductModel> {
     if(files.length > 0){
       const _images : any[] = [];
@@ -94,6 +95,7 @@ export class ProductService {
     return this.prismaService.product.update({
       where: {id: id},
       data: updateProductDto,
+      include: {cart: true},
     });
   }
 

@@ -3,16 +3,13 @@ import {Strategy} from 'passport-jwt';
 import {PassportStrategy} from '@nestjs/passport';
 import {Request} from 'express';
 import {CustomerService} from '@customer/customer.service';
-import {AdminService} from '@admin/admin.service';
-import {Admin as AdminModel, Customer as CustomerModel} from "@prisma/client";
-import {JWT_SECRET} from "@common/environment";
-import {Role} from "@common";
+import {Customer as CustomerModel} from "@prisma/client";
+import {JWT_SECRET} from "@common";
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class CustomerJwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private customerService: CustomerService,
-    private adminService: AdminService,
   ) {
     super({
       jwtFromRequest: (request: Request) => {
@@ -24,17 +21,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         }else{
           return request.headers.cookie;
         }
-
       },
       ignoreExpiration: false,
       secretOrKey: JWT_SECRET,
     });
   }
-  async validate(payload: any):Promise<AdminModel | CustomerModel>{
-    if(payload.role == Role.ADMIN){
-      return await this.adminService.getProfile(payload.sub);
-    }else{
-      return await this.customerService.getProfile(payload.sub);
-    }
+  async validate(payload: any):Promise<CustomerModel>{
+    return await this.customerService.getProfile(payload.sub);
   }
 }

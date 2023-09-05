@@ -61,9 +61,9 @@ model Product {
   images      String[]
   depo        String
   category    String
-  Cart        Cart[]
+  cart        Cart[]
   brand       String?  @default("Custom")
-  rating      Int?     @default(0)
+  rating      Float?   @default(0.0)
   numReviews  Int?     @default(0)
   numInStock  Int?     @default(0)
   colors      String[] @default([])

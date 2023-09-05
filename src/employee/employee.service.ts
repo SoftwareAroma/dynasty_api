@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { PrismaService } from '@shared/prisma/prisma.service';
 import {
   Employee as EmployeeModel,
@@ -8,9 +8,8 @@ import {CreateEmployeeInput} from "@employee/dto/employee.input.dto";
 import {UpdateEmployeeInput} from "@employee/dto/update.input.dto";
 import {CreateAttendanceInput} from "@employee/dto/attendance.input.dto";
 import {UpdateAttendanceInput} from "@employee/dto/attendance.update.dto";
-import {uploadFile} from "@shared";
+import {deleteFile, uploadFile} from "@shared";
 import {FileUpload} from "graphql-upload";
-import {async} from "rxjs";
 
 @Injectable()
 export class EmployeeService {
@@ -24,6 +23,7 @@ export class EmployeeService {
   ): Promise<EmployeeModel> {
     const _employee : EmployeeModel = await this.prismaService.employee.create({
       data: employeeInput,
+      include: {attendance: true},
     });
     if (file != null) {
       await this.updateEmployeeAvatar(_employee.id, file);
@@ -55,18 +55,26 @@ export class EmployeeService {
 
   /// delete the customer avatar
   async deleteEmployeeAvatar(id: string): Promise<boolean> {
-    const _customer : EmployeeModel = await this.prismaService.employee.findUnique({
+    const _employee : EmployeeModel = await this.prismaService.employee.findUnique({
       where: { id: id },
+      include: {attendance: true},
     });
-    if (_customer != null) {
-      _customer.avatar =
-        'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+    if (!_employee) {
+      throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
     }
+    const url : URL = new URL(_employee.avatar);
+    const pathnameParts : string[] = url.pathname.split('/');
+    const publicId : string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
+
+    // console.log(publicId);
+    await deleteFile(publicId);
+
     const saved: EmployeeModel = await this.prismaService.employee.update({
       where: { id: id },
       data: {
-        avatar: _customer.avatar,
+        avatar: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
       },
+      include: {attendance: true},
     });
     return !!saved;
   }

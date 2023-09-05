@@ -8,7 +8,6 @@ export class IProduct {
     depo: string;
     category: string;
     cart?: string[];
-    cartId?: string;
     brand?: string;
     rating?: number;
     numReviews?: number;

@@ -1,0 +1,276 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateAdminInput {
+  avatar: String
+  email: String!
+  firstName: String!
+  isAdmin: Boolean = true
+  lastName: String!
+  password: String!
+  phone: String
+  role: String = "ADMIN"
+  salt: String
+  userName: String
+}
+
+input CreateAttendanceInput {
+  closeTime: String
+  employeeId: String!
+  startTime: String!
+}
+
+input CreateCustomerInput {
+  avatar: String
+  createdAt: DateTime
+  email: String!
+  firstName: String!
+  isAdmin: Boolean = false
+  lastName: String!
+  password: String!
+  phone: String
+  role: String = "USER"
+  salt: String
+  social: String
+  updatedAt: DateTime
+  userName: String
+}
+
+input CreateEmployeeInput {
+  avatar: String
+  createdAt: DateTime
+  designation: String = "USER"
+  email: String
+  firstName: String!
+  lastName: String!
+  phoneNumber: String
+  updatedAt: DateTime
+}
+
+input CreateProductInput {
+  brand: String
+  category: String!
+  colors: [String!]!
+  createdAt: DateTime
+  depo: String!
+  description: String!
+  images: [String!]!
+  name: String!
+  numInStock: Int = 0
+  numReviews: Int = 0
+  price: JSON!
+  rating: Float = 0
+  sizes: [String!]!
+  updatedAt: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type GAdmin {
+  avatar: String
+  createdAt: DateTime
+  email: String!
+  firstName: String!
+  id: String!
+  isAdmin: Boolean
+  lastName: String!
+  password: String!
+  phone: String
+  role: String
+  salt: String
+  updatedAt: DateTime
+  userName: String
+}
+
+type GAttendance {
+  closeTime: String
+  createdAt: DateTime
+  employeeId: String!
+  id: ID!
+  startTime: String!
+  updatedAt: DateTime
+}
+
+type GCart {
+  createdAt: DateTime!
+  customer: GCustomer!
+  id: ID!
+  product: GProduct!
+  quantity: Int!
+  updatedAt: DateTime!
+}
+
+type GCustomer {
+  avatar: String
+  cart: [GCart!]
+  createdAt: DateTime
+  email: String!
+  firstName: String!
+  id: String!
+  isAdmin: Boolean
+  lastName: String!
+  password: String!
+  phone: String
+  role: String
+  salt: String
+  social: String
+  updatedAt: DateTime
+  userName: String
+}
+
+type GEmployee {
+  attendance: [GAttendance!]
+  avatar: String
+  createdAt: DateTime
+  designation: String!
+  email: String
+  firstName: String!
+  id: ID!
+  lastName: String!
+  phoneNumber: String
+  updatedAt: DateTime
+}
+
+type GMessage {
+  message: String!
+}
+
+type GProduct {
+  brand: String
+  cart: [String!]
+  cartId: String
+  category: String!
+  colors: [String!]!
+  createdAt: DateTime
+  depo: String!
+  description: String!
+  id: ID!
+  images: [String!]!
+  name: String!
+  numInStock: Int
+  numReviews: Int
+  price: JSON!
+  rating: Float
+  sizes: [String!]!
+  updatedAt: DateTime
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+input LoginAdminInput {
+  email: String!
+  password: String!
+}
+
+input LoginCustomerInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createAdmin(createAdminInput: CreateAdminInput!): GAdmin!
+  createAttendance(clockInInput: CreateAttendanceInput!, id: String!): GEmployee!
+  createCustomer(createCustomerInput: CreateCustomerInput!): GCustomer!
+  createEmployee(createEmployeeInput: CreateEmployeeInput!): GEmployee!
+  createProduct(createProductInput: CreateProductInput!, files: [Upload!]!): GProduct!
+  deleteAdmin(id: String!): Boolean!
+  deleteAdminAvatar(id: String!): Boolean!
+  deleteCustomer(id: String!): Boolean!
+  deleteCustomerAvatar(id: String!): Boolean!
+  deleteEmployee(id: String!): Boolean!
+  deleteEmployeeAvatar(id: String!): Boolean!
+  deleteProduct(id: String!): Boolean!
+  deleteProductImage(id: String!, image: String!): Boolean!
+  loginAdmin(loginAdminInput: LoginAdminInput!): GAdmin!
+  loginCustomer(loginCustomerInput: LoginCustomerInput!): GCustomer!
+  updateAdmin(id: String!, updateAdminInput: UpdateAdminInput!): GAdmin!
+  updateAdminAvatar(avatar: Upload!, id: String!): Boolean!
+  updateAttendance(attendanceId: String!, clockOutInput: UpdateAttendanceInput!, employeeId: String!): GEmployee!
+  updateCustomer(cartId: String!, id: String!, updateCartInput: UpdateCartInput!): GCustomer!
+  updateCustomerAvatar(avatar: Upload!, id: String!): Boolean!
+  updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): GEmployee!
+  updateEmployeeAvatar(avatar: Upload!, id: String!): Boolean!
+  updateProduct(files: Upload!, id: String!, updateProductInput: UpdateProductInput!): GProduct!
+}
+
+type Query {
+  getAdminById(id: String!): GAdmin!
+  getAdminProfile: GAdmin!
+  getAdmins: [GAdmin!]!
+  getAllAttendance: GAttendance!
+  getAttendance(id: String!): GAttendance!
+  getCustomerById(id: String!): GCustomer!
+  getCustomerProfile: GCustomer!
+  getCustomers: [GCustomer!]!
+  getEmployee(id: String!): GEmployee!
+  getEmployees: GEmployee!
+  getProductById(id: String!): GProduct!
+  getProductByName(name: String!): GProduct!
+  getProducts: [GProduct!]!
+  logoutAdmin: Boolean!
+  logoutCustomer: GCustomer!
+  sayHello: GMessage!
+}
+
+input UpdateAdminInput {
+  avatar: String
+  email: String
+  firstName: String
+  isAdmin: Boolean = true
+  lastName: String
+  password: String
+  phone: String
+  role: String = "ADMIN"
+  salt: String
+  userName: String
+}
+
+input UpdateAttendanceInput {
+  closeTime: String
+  employeeId: String
+  startTime: String
+}
+
+input UpdateCartInput {
+  customerId: String
+  productId: String
+  quantity: Int = 1
+}
+
+input UpdateEmployeeInput {
+  avatar: String
+  createdAt: DateTime
+  designation: String = "USER"
+  email: String
+  firstName: String
+  lastName: String
+  phoneNumber: String
+  updatedAt: DateTime
+}
+
+input UpdateProductInput {
+  brand: String
+  category: String
+  colors: [String!]
+  createdAt: DateTime
+  depo: String
+  description: String
+  images: [String!]
+  name: String
+  numInStock: Int = 0
+  numReviews: Int = 0
+  price: JSON
+  rating: Float = 0
+  sizes: [String!]
+  updatedAt: DateTime
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
