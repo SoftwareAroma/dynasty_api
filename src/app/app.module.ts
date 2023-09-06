@@ -4,36 +4,28 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from 'src/shared/common';
 import { AdminModule } from '@admin/admin.module';
 import {ThrottlerModule} from '@nestjs/throttler';
-import { CustomerModule } from '@customer/customer.module';
-import { ProductModule } from '@product/product.module';
-import { PrismaModule } from '@shared/prisma/prisma.module';
 import Joi from 'joi';
-import { EmployeeModule } from '@employee/employee.module';
 import {APP_FILTER} from '@nestjs/core';
 import {
   HttpExceptionFilter,
-  PrismaClientExceptionFilter
+  PrismaClientExceptionFilter,
+  PrismaModule
 } from "@shared";
-import {AppController} from "@app/app.controller";
+import {AppController} from "./app.controller";
 
 @Module({
   imports: [
-    /// other modules
-    AdminModule,
-    CustomerModule,
-    ProductModule,
-    EmployeeModule,
-
-    // prisma for database query and connection
     PrismaModule,
+    AdminModule,
+    // CustomerModule,
+    // ProductModule,
+    // EmployeeModule,
 
-    /// prevent brute force attack
     ThrottlerModule.forRoot({
       ttl: 1000 * 60 * 60,
       limit: 100,
     }),
 
-    /// configurations
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true,
@@ -65,5 +57,6 @@ import {AppController} from "@app/app.controller";
       useClass: PrismaClientExceptionFilter,
     },
   ],
+  exports: [AppService]
 })
 export class AppModule { }

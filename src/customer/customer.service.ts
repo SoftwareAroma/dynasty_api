@@ -10,12 +10,10 @@ import {
   deleteFile, uploadFile
 } from '@shared';
 import {ConfigService} from "@nestjs/config";
-import {CreateCartDto} from "@customer/dto/create-cart.dto";
-import {UpdateCartDto} from "@customer/dto/update-cart.dto";
 import {Response} from 'express';
-import {CreateCustomerDto} from "@customer/dto/create.dto";
+import {CreateCartDto, CreateCustomerDto} from "@customer/dto/create.dto";
 import {LoginCustomerDto} from "@customer/dto/login.dto";
-import {UpdateCustomerDto} from "@customer/dto/update.dto";
+import {UpdateCartDto, UpdateCustomerDto} from "@customer/dto/update.dto";
 
 @Injectable()
 export class CustomerService {

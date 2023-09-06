@@ -7,21 +7,14 @@ import {
   Patch,
   Post,
   UploadedFiles,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {ProductService} from '@product/product.service';
 import {Product as ProductModel} from '@prisma/client';
 import {CreateProductDto} from '@product/dto/create.dto';
-import {CheckPolicies, JwtAuthGuard} from 'src/shared/common';
 import {FilesInterceptor} from '@nestjs/platform-express';
 import {UpdateProductDto} from '@product/dto/update.dto';
-import {PoliciesGuard} from '@shared/common/guards/policies.guard';
-import {
-  CreateProductPolicyHandler,
-  DeleteProductPolicyHandler,
-  UpdateProductPolicyHandler,
-} from '@shared';
+
 
 @Controller({ path: 'product', version: '1' })
 export class ProductController {
@@ -32,8 +25,8 @@ export class ProductController {
    * @param createProductDto
    * @param files
    */
-  @UseGuards(JwtAuthGuard, PoliciesGuard)
-  @CheckPolicies(new CreateProductPolicyHandler())
+  // @UseGuards(JwtAuthGuard, PoliciesGuard)
+  // @CheckPolicies(new CreateProductPolicyHandler())
   @UseInterceptors(FilesInterceptor('images'))
   @Post('create')
   async createProduct(
@@ -81,8 +74,8 @@ export class ProductController {
    * @param id
    * @param files
    */
-  @UseGuards(JwtAuthGuard,PoliciesGuard)
-  @CheckPolicies(new UpdateProductPolicyHandler())
+  // @UseGuards(JwtAuthGuard,PoliciesGuard)
+  // @CheckPolicies(new UpdateProductPolicyHandler())
   @UseInterceptors(FilesInterceptor('images'))
   @Patch('product/:id')
   async updateProduct(
@@ -103,8 +96,8 @@ export class ProductController {
    *  delete product image
    * @param params
    */
-  @UseGuards(JwtAuthGuard, PoliciesGuard)
-  @CheckPolicies(new UpdateProductPolicyHandler())
+  // @UseGuards(JwtAuthGuard, PoliciesGuard)
+  // @CheckPolicies(new UpdateProductPolicyHandler())
   @Post('product/:id/:image')
   async deleteProductImage(@Param() params : any): Promise<boolean> {
     const { id, fileName } = params;
@@ -115,8 +108,8 @@ export class ProductController {
    * delete product
    * @param id
    */
-  @UseGuards(JwtAuthGuard, PoliciesGuard)
-  @CheckPolicies(new DeleteProductPolicyHandler())
+  // @UseGuards(JwtAuthGuard, PoliciesGuard)
+  // @CheckPolicies(new DeleteProductPolicyHandler())
   @Delete('product/:id')
   async deleteProduct(@Param('id') id: string): Promise<boolean> {
     return await this.productService.deleteProduct(id);

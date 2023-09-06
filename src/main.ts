@@ -4,11 +4,10 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import {ValidationPipe, VersioningType} from '@nestjs/common';
-import {graphqlUploadExpress} from "graphql-upload";
 import {DocumentBuilder, OpenAPIObject, SwaggerModule} from "@nestjs/swagger";
-import {API_VERSION, PORT, SWAGGER_PATH} from "src/shared/common";
+import {API_VERSION, PORT, SWAGGER_PATH} from "@shared";
 
-/*
+/**
  * The main function that bootstraps the app
  * takes no arguments and returns void
  * It creates an instance of the Nest application
@@ -21,18 +20,12 @@ const bootstrap = async (): Promise<void> => {
   /// global prefix
   app.setGlobalPrefix('api');
 
-  /* APP VERSIONING */
+  /**
+   *  APP VERSIONING
+   *  */
   app.enableVersioning({
     type: VersioningType.URI,
   });
-
-  /**
-   * Enable graphql upload
-   */
-  app.use(
-      '/graphql',
-      graphqlUploadExpress({ maxFileSize: 50000000, maxFiles: 10 }),
-  );
 
   /**
    * Enable cors
@@ -69,7 +62,7 @@ const bootstrap = async (): Promise<void> => {
       }),
   );
 
-  /*
+  /**
    * ###########################################################
    * ##################### SWAGGER CONFIG ######################
    * ###########################################################

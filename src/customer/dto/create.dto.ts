@@ -58,3 +58,20 @@ export class CreateCustomerDto {
   @ApiProperty({required: false, default: false})
   isAdmin: boolean;
 }
+
+export class CreateCartDto {
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  customerId: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  productId: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({required: false, default: 1})
+  quantity?: number;
+}

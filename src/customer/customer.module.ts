@@ -2,12 +2,11 @@ import { Module } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import {CaslModule, JWT_EXPIRES_IN, JWT_SECRET, CustomerJwtStrategy} from '@shared';
+import {JWT_EXPIRES_IN, JWT_SECRET, CustomerJwtStrategy} from '@shared';
 import {CustomerController} from "./customer.controller";
 
 @Module({
   imports: [
-    CaslModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: JWT_SECRET,

@@ -1,11 +1,9 @@
 import {HttpException, Injectable} from '@nestjs/common';
 import {Product as ProductModel} from '@prisma/client';
 import {PrismaService} from '@shared/prisma/prisma.service';
-import {CreateProductInput} from "@product/dto/product.input.dto";
-import {UpdateProductInput} from "@product/dto/update.input.dto";
-import {deleteFile, uploadFile, uploadFiles} from "@shared";
-import {FileUpload} from "graphql-upload";
+import {deleteFile, uploadFile} from "@shared";
 import {CreateProductDto} from "@product/dto/create.dto";
+import {UpdateProductDto} from "@product/dto/update.dto";
 
 @Injectable()
 export class ProductService {
@@ -75,19 +73,19 @@ export class ProductService {
    */
   async updateProduct(
     id: string,
-    updateProductDto: UpdateProductInput,
+    updateProductDto: UpdateProductDto,
     files?: Array<Express.Multer.File>,
   ): Promise<ProductModel> {
     if(files.length > 0){
       const _images : any[] = [];
       for (const image of files) {
-        // const _fileUrl : string = await uploadFile(
-        //   image,
-        //   `${image.filename?.split('.')[0]}`,
-        //   'dynasty/products',
-        //     'dynasty_product_image'
-        // );
-        // _images.push(_fileUrl);
+        const _fileUrl : string = await uploadFile(
+          image,
+          `${image.filename?.split('.')[0]}`,
+          'dynasty/products',
+            'dynasty_product_image'
+        );
+        _images.push(_fileUrl);
       }
       updateProductDto.images = _images;
     }
