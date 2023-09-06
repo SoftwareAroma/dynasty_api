@@ -8,7 +8,7 @@ import {
   Post,
   Req,
   Res,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {CustomerService} from '@customer/customer.service';
@@ -18,6 +18,14 @@ import {Customer as CustomerModel} from '@prisma/client';
 import {LoginCustomerDto} from '@customer/dto/login.dto';
 import {CreateCartDto, CreateCustomerDto} from '@customer/dto/create.dto';
 import {FileInterceptor} from '@nestjs/platform-express';
+import {
+  CheckPolicies,
+  DeleteCustomerPolicyHandler,
+  JwtAuthGuard,
+  ReadCustomerPolicyHandler,
+  UpdateCustomerPolicyHandler
+} from "@shared";
+import {PoliciesGuard} from "@shared/secure/policy.guard";
 
 @Controller({ path: 'customer', version: '1' })
 export class CustomerController {
@@ -55,8 +63,8 @@ export class CustomerController {
    * get all customers
    */
   @Get('customers')
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new ReadCustomerPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new ReadCustomerPolicyHandler())
   async getAllCustomers(): Promise<CustomerModel[]> {
     return await this.customerService.getCustomers();
   }
@@ -65,8 +73,8 @@ export class CustomerController {
    * get customer profile
    * @param request
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new ReadCustomerPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new ReadCustomerPolicyHandler())
   @Get('profile')
   async getProfile(@Req() request: any): Promise<CustomerModel> {
     const { userId } = request.user;
@@ -78,8 +86,8 @@ export class CustomerController {
    * @param id
    * @param avatar
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new UpdateCustomerPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new UpdateCustomerPolicyHandler())
   @Patch('avatar/:id')
   @UseInterceptors(FileInterceptor('avatar'))
   async updateCustomerAvatar(
@@ -94,8 +102,8 @@ export class CustomerController {
    * delete avatar
    * @param id
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new UpdateCustomerPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new UpdateCustomerPolicyHandler())
   @Post('delete-avatar/:id')
   async deleteCustomerAvatar(
     @Param('id') id: string,
@@ -109,8 +117,8 @@ export class CustomerController {
    * @param id
    * @param updateCustomerDto
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new UpdateCustomerPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new UpdateCustomerPolicyHandler())
   @Patch('update/:id')
   async updateCustomerProfile(
     @Param('id') id: string,
@@ -124,8 +132,8 @@ export class CustomerController {
    * @param id
    * @param createCartDto
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new UpdateCustomerPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new UpdateCustomerPolicyHandler())
   @Patch('cart/:id')
   async addToCart(
       @Param('id') id: string,
@@ -140,8 +148,8 @@ export class CustomerController {
    * @param cartId
    * @param updateCartDto
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new UpdateCustomerPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new UpdateCustomerPolicyHandler())
   @Patch('update-cart/:id/:cartId')
   async updateCart(
       @Param('id') id: string,
@@ -167,8 +175,8 @@ export class CustomerController {
    * @param id
    * @param response
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new DeleteCustomerPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new DeleteCustomerPolicyHandler())
   @Delete('delete/:id')
   async deleteCustomerData(
     @Param('id') id: string,

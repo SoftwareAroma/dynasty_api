@@ -18,6 +18,8 @@ import {
 } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateEmployeeDto } from './dto/update.dto';
+import {CheckPolicies, CreateEmployeePolicyHandler, DeleteEmployeePolicyHandler, JwtAuthGuard} from "@shared";
+import {PoliciesGuard} from "@shared/secure/policy.guard";
 
 
 @Controller({ path: 'employee', version: '1' })
@@ -29,8 +31,8 @@ export class EmployeeController {
    * @param createEmployeeDto
    * @param file
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new CreateEmployeePolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new CreateEmployeePolicyHandler())
   @UseInterceptors(FileInterceptor('avatar'))
   @Post('create')
   async createEmployee(
@@ -144,8 +146,8 @@ export class EmployeeController {
    * delete admin
    * @param id
    */
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies(new DeleteEmployeePolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new DeleteEmployeePolicyHandler())
   @Delete('delete/:id')
   deleteEmployee(@Param('id') id: string): Promise<boolean> {
     return this.employeeService.deleteEmployee(id);

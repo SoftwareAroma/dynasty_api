@@ -4,9 +4,11 @@ import {ProductController} from "./product.controller";
 import {PassportModule} from "@nestjs/passport";
 import {JwtModule} from "@nestjs/jwt";
 import {JWT_EXPIRES_IN, JWT_SECRET} from "@shared";
+import {SecureModule} from "@shared/secure/secure.module";
 
 @Module({
   imports: [
+      SecureModule,
       PassportModule.register({ defaultStrategy: 'jwt' }),
       JwtModule.register({
       secret: JWT_SECRET,

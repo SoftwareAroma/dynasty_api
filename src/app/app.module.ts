@@ -12,14 +12,17 @@ import {
   PrismaModule
 } from "@shared";
 import {AppController} from "./app.controller";
+import {CustomerModule} from "@customer/customer.module";
+import {ProductModule} from "@product/product.module";
+import {EmployeeModule} from "@employee/employee.module";
 
 @Module({
   imports: [
     PrismaModule,
     AdminModule,
-    // CustomerModule,
-    // ProductModule,
-    // EmployeeModule,
+    CustomerModule,
+    ProductModule,
+    EmployeeModule,
 
     ThrottlerModule.forRoot({
       ttl: 1000 * 60 * 60,

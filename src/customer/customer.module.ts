@@ -4,9 +4,11 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import {JWT_EXPIRES_IN, JWT_SECRET, CustomerJwtStrategy} from '@shared';
 import {CustomerController} from "./customer.controller";
+import {SecureModule} from "@shared/secure/secure.module";
 
 @Module({
   imports: [
+    SecureModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: JWT_SECRET,
@@ -23,3 +25,4 @@ import {CustomerController} from "./customer.controller";
   exports: [CustomerService],
 })
 export class CustomerModule {}
+

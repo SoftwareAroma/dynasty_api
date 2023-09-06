@@ -18,10 +18,12 @@ import { Response } from 'express';
 import { LoginAdminDto } from '@admin/dto/login.dto';
 import { UpdateAdminDto } from '@admin/dto/update.dto';
 import {
-  JwtAuthGuard,
+  CheckPolicies, DeleteAdminPolicyHandler,
+  JwtAuthGuard, ReadAdminPolicyHandler, UpdateAdminPolicyHandler,
 } from '@shared';
 import { Admin as AdminModel } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {PoliciesGuard} from "@shared/secure/policy.guard";
 
 @Controller({ path: 'admin', version: '1' })
 export class AdminController {
@@ -58,8 +60,8 @@ export class AdminController {
   /**
    * get all admins
    */
-  @UseGuards(JwtAuthGuard)
-  // @CheckPolicies(new ReadAdminPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new ReadAdminPolicyHandler())
   @Get('admins')
   async getAllAdmins(): Promise<AdminModel[]> {
     return await this.adminService.getAdmins();
@@ -69,8 +71,8 @@ export class AdminController {
    * get admin profile
    * @param request
    */
-  @UseGuards(JwtAuthGuard)
-  // @CheckPolicies(new ReadAdminPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new ReadAdminPolicyHandler())
   @Get('profile')
   async getProfile(@Req() request: any): Promise<AdminModel> {
     const { userId } = request.user;
@@ -82,8 +84,8 @@ export class AdminController {
    * @param id
    * @param avatar
    */
-  @UseGuards(JwtAuthGuard)
-  // @CheckPolicies(new UpdateAdminPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new UpdateAdminPolicyHandler())
   @UseInterceptors(FileInterceptor('avatar'))
   @Patch('avatar/:id')
   async updateCustomerAvatar(
@@ -98,8 +100,8 @@ export class AdminController {
    * delete-avatar
    * @param id
    */
-  @UseGuards(JwtAuthGuard)
-  // @CheckPolicies(new UpdateAdminPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new UpdateAdminPolicyHandler())
   @Post('delete-avatar/:id')
   async deleteCustomerAvatar(
     @Param('id') id: string,
@@ -113,8 +115,8 @@ export class AdminController {
    * @param id
    * @param updateClientDto
    */
-  @UseGuards(JwtAuthGuard)
-  // @CheckPolicies(new UpdateAdminPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new UpdateAdminPolicyHandler())
   @Patch('update/:id')
   async updateClientProfile(
     @Param('id') id: string,
@@ -139,8 +141,8 @@ export class AdminController {
    * @param id
    * @param response
    */
-  @UseGuards(JwtAuthGuard)
-  // @CheckPolicies(new DeleteAdminPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @CheckPolicies(new DeleteAdminPolicyHandler())
   @Delete('delete/:id')
   async deleteAdminData(
     @Param('id') id: string,

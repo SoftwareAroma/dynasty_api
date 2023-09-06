@@ -1,11 +1,16 @@
 import { AbilityBuilder, PureAbility } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
-import {
-    Admin as AdminModel,
-} from '@prisma/client';
 import { createPrismaAbility, PrismaQuery, Subjects } from '@casl/prisma';
 import {Role,Action} from "@shared";
 
+import {
+    Admin as AdminModel,
+    Customer as CustomerModel,
+    Product as ProductModel,
+    Cart as CartModel,
+    Attendance as AttendanceModel,
+    Employee as EmployeeModel,
+} from '@prisma/client';
 
 export type AppAbility = PureAbility<
     [
@@ -13,7 +18,12 @@ export type AppAbility = PureAbility<
         (
             | 'all'
             | Subjects<{
+            CustomerModel: CustomerModel;
             AdminModel: AdminModel;
+            ProductModel: ProductModel;
+            CartModel: CartModel;
+            AttendanceModel: AttendanceModel;
+            EmployeeModel: EmployeeModel;
         }>
             ),
     ],
