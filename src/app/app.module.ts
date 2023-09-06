@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import configuration, {JwtStrategy} from '@common';
+import configuration from 'src/shared/common';
 import { AdminModule } from '@admin/admin.module';
 import {ThrottlerModule} from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
@@ -10,15 +10,11 @@ import { PrismaModule } from '@shared/prisma/prisma.module';
 import Joi from 'joi';
 import { EmployeeModule } from '@employee/employee.module';
 import {APP_FILTER} from '@nestjs/core';
-import { AppResolver } from './app.resolver';
-import {GraphQLModule} from "@nestjs/graphql";
-import {ApolloDriver} from "@nestjs/apollo";
-import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
 import {
-  GqlExceptionFilter,
   HttpExceptionFilter,
   PrismaClientExceptionFilter
 } from "@shared";
+import {AppController} from "@app/app.controller";
 
 @Module({
   imports: [
@@ -35,32 +31,6 @@ import {
     ThrottlerModule.forRoot({
       ttl: 1000 * 60 * 60,
       limit: 100,
-    }),
-
-    /// GRAPHQL MODULE CONFIGURATION
-    GraphQLModule.forRoot({
-      installSubscriptionHandlers: true,
-      driver: ApolloDriver,
-      subscriptions: {
-        'graphql-ws': true
-      },
-      autoSchemaFile: true,
-      introspection: true, // Enable introspection
-      sortSchema: true,
-      playground: false,
-      uploads: false,
-      plugins: [
-        ApolloServerPluginLandingPageLocalDefault()
-      ],
-      debug: true,
-      cors: {
-        origin: true,
-        credentials: true,
-      },
-      // add context object for request and response
-      context: ({ req, res }):{req: any, res: any} => {
-        return { req, res };
-      },
     }),
 
     /// configurations
@@ -81,17 +51,14 @@ import {
       },
     }),
   ],
+  controllers: [
+      AppController,
+  ],
   providers: [
     AppService,
-    AppResolver,
-    JwtStrategy,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: GqlExceptionFilter,
     },
     {
       provide: APP_FILTER,

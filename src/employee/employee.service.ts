@@ -4,13 +4,9 @@ import {
   Employee as EmployeeModel,
   Attendance as AttendanceModel,
 } from '@prisma/client';
-import {CreateEmployeeInput} from "@employee/dto/employee.input.dto";
-import {UpdateEmployeeInput} from "@employee/dto/update.input.dto";
-import {CreateAttendanceInput} from "@employee/dto/attendance.input.dto";
-import {UpdateAttendanceInput} from "@employee/dto/attendance.update.dto";
 import {uploadFile} from "@shared";
-import {FileUpload} from "graphql-upload";
-import {async} from "rxjs";
+import {CreateAttendanceDto, CreateEmployeeDto} from "@employee/dto/create.dto";
+import {UpdateAttendanceDto, UpdateEmployeeDto} from "@employee/dto/update.dto";
 
 @Injectable()
 export class EmployeeService {
@@ -19,14 +15,14 @@ export class EmployeeService {
   ) { }
 
   async createEmployee(
-    employeeInput: CreateEmployeeInput,
-    file?: FileUpload,
+    employeeDto: CreateEmployeeDto,
+    file?: Express.Multer.File,
   ): Promise<EmployeeModel> {
     const _employee : EmployeeModel = await this.prismaService.employee.create({
-      data: employeeInput,
+      data: employeeDto,
     });
     if (file != null) {
-      await this.updateEmployeeAvatar(_employee.id, file);
+      // await this.updateEmployeeAvatar(_employee.id, file);
     }
     return _employee;
   }
@@ -34,9 +30,9 @@ export class EmployeeService {
   /// update the avatar of customer
   async updateEmployeeAvatar(
     id: string,
-    file: FileUpload,
+    file: Express.Multer.File,
   ): Promise<boolean> {
-    const _uploadFile = await uploadFile(
+    const _uploadFile: string = await uploadFile(
       file,
       `${file.filename?.split('.')[0]}`,
       'dynasty/customer/avatar',
@@ -82,11 +78,11 @@ export class EmployeeService {
 
   async updateEmployee(
     id: string,
-    updateEmployeeInput: UpdateEmployeeInput,
+    updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<EmployeeModel> {
     return this.prismaService.employee.update({
       where: { id: id },
-      data: updateEmployeeInput,
+      data: updateEmployeeDto,
     });
   }
 
@@ -109,7 +105,7 @@ export class EmployeeService {
   // Attendance
   async clockIn(
     id: string,
-    attendanceInput: CreateAttendanceInput,
+    attendanceInput: CreateAttendanceDto,
   ): Promise<EmployeeModel> {
     return this.prismaService.employee.update({
       where: { id: id },
@@ -127,7 +123,7 @@ export class EmployeeService {
   async clockOut(
     employeeId: string,
     attendanceId: string,
-    updateAttendanceInput: UpdateAttendanceInput,
+    updateAttendanceDto: UpdateAttendanceDto,
   ): Promise<EmployeeModel> {
     return this.prismaService.employee.update({
       where: { id: employeeId },
@@ -135,7 +131,7 @@ export class EmployeeService {
         attendance: {
           update: {
             where: { id: attendanceId },
-            data: updateAttendanceInput,
+            data: updateAttendanceDto,
           },
         },
       },

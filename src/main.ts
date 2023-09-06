@@ -1,11 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { ValidationPipe } from '@nestjs/common';
+import {ValidationPipe, VersioningType} from '@nestjs/common';
 import {graphqlUploadExpress} from "graphql-upload";
+import {DocumentBuilder, OpenAPIObject, SwaggerModule} from "@nestjs/swagger";
+import {API_VERSION, PORT, SWAGGER_PATH} from "src/shared/common";
 
 /*
  * The main function that bootstraps the app
@@ -16,9 +17,14 @@ const bootstrap = async (): Promise<void> => {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // 'log' // remove log to disable logging
   });
-  // app environment service
-  const configService : ConfigService<unknown, boolean> = app.get(ConfigService);
   app.enableShutdownHooks();
+  /// global prefix
+  app.setGlobalPrefix('api');
+
+  /* APP VERSIONING */
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
 
   /**
    * Enable graphql upload
@@ -54,31 +60,40 @@ const bootstrap = async (): Promise<void> => {
     }),
   );
 
-  // add csrf protection
-  //   app.use(csurf());
-
-    // app.use((req: any, res: any, next: any) : void  => {
-    //     const token = req.csrfToken();
-    //     res.cookie('XSRF-TOKEN', token);
-    //     res.locals.csrfToken = token;
-    //
-    //     next();
-    // });
-
   /**
    * Enable validation pipe
    */
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+      }),
+  );
+
+  /*
+   * ###########################################################
+   * ##################### SWAGGER CONFIG ######################
+   * ###########################################################
+   * */
+  const config: Omit<OpenAPIObject, any> = new DocumentBuilder()
+      .setTitle(`DYNASTY URBAN STYLE API version ${API_VERSION}`)
+      .setDescription(
+          'This is the backend api interface for the DYNASTY URBAN STYLE web project',
+      )
+      .setVersion(`${API_VERSION}`)
+      .build();
+
+  const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
+  // path for swagger
+  SwaggerModule.setup(`${SWAGGER_PATH}`, app, document);
 
   /**
    * Start the app
    */
-  const port = configService.get<number>('PORT');
   await app
-    .listen(port)
+    .listen(PORT)
     .then((): void => {
-      console.log(`Application started successfully at ${app.getUrl()}`);
-      console.log(`Server running on port http://localhost:${port}/graphql`);
+      console.log(`Application started successfully at http://localhost:${PORT}/`);
+      console.log(`Server running on port http://localhost:${PORT}/${SWAGGER_PATH}`);
       console.log('Press CTRL-C to stop server');
     })
     .catch((err): void => {

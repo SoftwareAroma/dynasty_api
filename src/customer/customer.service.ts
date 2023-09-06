@@ -1,17 +1,21 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { Customer as CustomerModel } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
-import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword} from '@common';
-import { PrismaService } from '@shared/prisma/prisma.service';
-import {Ctx} from "@common/context";
+import {
+  PrismaService,
+  comparePassword,
+  generateSalt,
+  getDefaultPropertyValue,
+  hashPassword,
+  deleteFile, uploadFile
+} from '@shared';
 import {ConfigService} from "@nestjs/config";
-import {CreateCustomerInput} from "@customer/dto/customer.input.dto";
-import {LoginCustomerInput} from "@customer/dto/login.input.dto";
-import {UpdateCustomerInput} from "@customer/dto/update.input.dto";
-import {CreateCartInput} from "@customer/dto/cart.input.dto";
-import {UpdateCartInput} from "@customer/dto/cart.update.dto";
-import {FileUpload} from "graphql-upload";
-import {deleteFile, uploadFile} from "@shared";
+import {CreateCartDto} from "@customer/dto/create-cart.dto";
+import {UpdateCartDto} from "@customer/dto/update-cart.dto";
+import {Response} from 'express';
+import {CreateCustomerDto} from "@customer/dto/create.dto";
+import {LoginCustomerDto} from "@customer/dto/login.dto";
+import {UpdateCustomerDto} from "@customer/dto/update.dto";
 
 @Injectable()
 export class CustomerService {
@@ -23,38 +27,38 @@ export class CustomerService {
 
   /**
    * register customer
-   * @param createCustomerInput
-   * @param context
+   * @param createCustomerDto
+   * @param response
    */
-  async register(createCustomerInput: CreateCustomerInput, context:Ctx): Promise<CustomerModel> {
+  async register(createCustomerDto: CreateCustomerDto, response:Response): Promise<CustomerModel> {
     // check if email already exists
     const emailExists = await this.prismaService.customer.findUnique({
-      where: { email: createCustomerInput.email },
+      where: { email: createCustomerDto.email },
     });
     if (emailExists) {
       throw new HttpException( 'Email already exists', HttpStatus.CONFLICT);
     }
-    if (createCustomerInput.userName == null) {
-      createCustomerInput.userName = `${createCustomerInput.firstName}`;
+    if (createCustomerDto.userName == null) {
+      createCustomerDto.userName = `${createCustomerDto.firstName}`;
     }
     // generate salt
-    createCustomerInput.salt = await generateSalt();
+    createCustomerDto.salt = await generateSalt();
     // hash password , add the hashed password to the dto
-    createCustomerInput.password = await hashPassword(
-        createCustomerInput.password,
-        createCustomerInput.salt,
+    createCustomerDto.password = await hashPassword(
+        createCustomerDto.password,
+        createCustomerDto.salt,
     );
 
     // create a new user
     const _customer: CustomerModel = await this.prismaService.customer.create({
-      data: createCustomerInput,
+      data: createCustomerDto,
       include: {Cart: true}
     });
     // generate a token
     const payload = { sub: _customer.id, username: _customer.email, role: _customer.role };
     const token = await this.jwtService.signAsync(payload);
     /// set cookie
-    context.res.cookie('access_token', token, {
+    response.cookie('access_token', token, {
       domain: this.configService.get<string>('DOMAIN'),
       httpOnly: true,
     });
@@ -64,10 +68,10 @@ export class CustomerService {
   /**
    * login customer
    * @param loginCustomerDto
-   * @param context
+   * @param response
    */
-  async loginCustomer(loginCustomerDto: LoginCustomerInput, context:Ctx): Promise<CustomerModel> {
-    const customer = await this.prismaService.customer.findUnique({
+  async loginCustomer(loginCustomerDto: LoginCustomerDto, response:Response): Promise<CustomerModel> {
+    const customer: CustomerModel = await this.prismaService.customer.findUnique({
       where: { email: loginCustomerDto.email },
       include: {Cart: true}
     });
@@ -83,7 +87,7 @@ export class CustomerService {
     const payload = { username: customer.email, sub: customer.id, role: customer.role  };
     const token = await this.jwtService.signAsync(payload);
     /// set cookie
-    context.res.cookie('access_token', token, {
+    response.cookie('access_token', token, {
       domain: this.configService.get<string>('DOMAIN'),
       httpOnly: true,
     });
@@ -127,7 +131,7 @@ export class CustomerService {
    */
   async updateProfile(
     id: string,
-    updateCustomerDto: UpdateCustomerInput,
+    updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerModel> {
     const updated: CustomerModel = await this.prismaService.customer.update({
       where: { id: id },
@@ -139,17 +143,17 @@ export class CustomerService {
   /**
    * add to cart
    * @param id
-   * @param cartInput
+   * @param cartDto
    */
   async addToCart(
       id: string,
-      cartInput: CreateCartInput,
+      cartDto: CreateCartDto,
   ): Promise<CustomerModel> {
     return this.prismaService.customer.update({
       where: { id: id },
       data: {
         Cart: {
-          create: cartInput,
+          create: cartDto,
         },
       },
       include: {
@@ -162,7 +166,7 @@ export class CustomerService {
   async updateCart(
       customerId: string,
       cartId: string,
-      updateCartInput: UpdateCartInput,
+      updateCartDto: UpdateCartDto,
   ): Promise<CustomerModel> {
     return this.prismaService.customer.update({
       where: { id: customerId },
@@ -170,7 +174,7 @@ export class CustomerService {
         Cart: {
           update: {
             where: { id: cartId },
-            data: updateCartInput,
+            data: updateCartDto,
           },
         },
       },
@@ -185,7 +189,7 @@ export class CustomerService {
    * @param id
    * @param file
    */
-  async updateAvatar(id: string, file: FileUpload): Promise<boolean> {
+  async updateAvatar(id: string, file: Express.Multer.File): Promise<boolean> {
     // console.log(`File name > ${file.filename?.split('.')[0]}`);
     const _uploadFile = await uploadFile(
         file,
@@ -257,10 +261,10 @@ export class CustomerService {
     return !!_customer;
   }
 
-  /*
-   * ##################################################
-   * ######### private methods ########################
-   * ##################################################
+  /**
+   * --------------------------------------------------
+   * ------------ private methods ---------------------
+   * --------------------------------------------------
    * */
 
   /// validate social user

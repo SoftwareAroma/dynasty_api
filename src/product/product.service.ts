@@ -5,6 +5,7 @@ import {CreateProductInput} from "@product/dto/product.input.dto";
 import {UpdateProductInput} from "@product/dto/update.input.dto";
 import {deleteFile, uploadFile, uploadFiles} from "@shared";
 import {FileUpload} from "graphql-upload";
+import {CreateProductDto} from "@product/dto/create.dto";
 
 @Injectable()
 export class ProductService {
@@ -18,15 +19,15 @@ export class ProductService {
      * @param files
      */
     async createProduct(
-      createProductDto: CreateProductInput,
-      files?: Array<FileUpload>,
+      createProductDto: CreateProductDto,
+      files?: Array<Express.Multer.File>,
     ): Promise<ProductModel> {
       if (files && files.length > 0) {
-        const public_ids: string[] = files?.map((file: FileUpload) => {
-          const fileName: string = file.filename;
-          return fileName.replace(/\.[^/.]+$/, "");
-        });
-        createProductDto.images = await uploadFiles(files, public_ids, 'dynasty_product_image');
+        // const public_ids: string[] = files?.map((file: FileUpload) => {
+        //   const fileName: string = file.filename;
+        //   return fileName.replace(/\.[^/.]+$/, "");
+        // });
+        // createProductDto.images = await uploadFiles(files, public_ids, 'dynasty_product_image');
       }
       createProductDto.price.amount = Number(createProductDto.price.amount);
       console.log("Product >>>>", createProductDto.images);
@@ -75,18 +76,18 @@ export class ProductService {
   async updateProduct(
     id: string,
     updateProductDto: UpdateProductInput,
-    files?: Array<FileUpload>,
+    files?: Array<Express.Multer.File>,
   ): Promise<ProductModel> {
     if(files.length > 0){
       const _images : any[] = [];
       for (const image of files) {
-        const _fileUrl : string = await uploadFile(
-          image,
-          `${image.filename?.split('.')[0]}`,
-          'dynasty/products',
-            'dynasty_product_image'
-        );
-        _images.push(_fileUrl);
+        // const _fileUrl : string = await uploadFile(
+        //   image,
+        //   `${image.filename?.split('.')[0]}`,
+        //   'dynasty/products',
+        //     'dynasty_product_image'
+        // );
+        // _images.push(_fileUrl);
       }
       updateProductDto.images = _images;
     }

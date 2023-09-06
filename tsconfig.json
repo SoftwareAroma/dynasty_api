@@ -30,8 +30,6 @@
       "@product": ["src/product"],
       "@employee": ["src/employee"],
       "@employee/*": ["src/employee/*"],
-      "@common": ["src/common"],
-      "@common/*": ["src/common/*"],
       "@shared": ["src/shared"],
       "@shared/*": ["src/shared/*"],
     }

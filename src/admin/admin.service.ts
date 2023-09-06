@@ -1,31 +1,33 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
-import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword} from '@common';
-import {PrismaService} from '@shared/prisma/prisma.service';
-import {CreateAdminInput} from "@admin/dto/admin.input.dto";
-import {LoginAdminInput} from "@admin/dto/login.input.dto";
-import {UpdateAdminInput} from "@admin/dto/update.input.dto";
-import {Ctx} from "@common/context";
-import {ConfigService} from "@nestjs/config";
+import {
+  PrismaService,
+  comparePassword,
+  DOMAINS,
+  generateSalt,
+  getDefaultPropertyValue,
+  hashPassword, uploadFile
+} from '@shared';
 import {Admin as AdminModel} from "@prisma/client";
-import {deleteFile, uploadFile} from "@shared";
-import {FileUpload} from "graphql-upload";
-import * as url from "url";
+import {deleteFile} from "@shared";
+import {Response} from "express";
+import {CreateAdminDto} from "@admin/dto/create.dto";
+import {LoginAdminDto} from "@admin/dto/login.dto";
+import {UpdateAdminDto} from "@admin/dto/update.dto";
 
 @Injectable()
 export class AdminService {
   constructor(
     private prismaService: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
   ) { }
 
   /**
    * create admin
    * @param createAdminInput
-   * @param context
+   * @param response
    */
-  async register(createAdminInput: CreateAdminInput, context: Ctx): Promise<AdminModel> {
+  async register(createAdminInput: CreateAdminDto, response: Response): Promise<AdminModel> {
     // check if email already exists
     const emailExists = await this.prismaService.admin.findUnique({
       where: { email: createAdminInput.email },
@@ -52,8 +54,8 @@ export class AdminService {
     const payload = { sub: admin.id, username: admin.email, role: admin.role  };
     const token = await this.jwtService.signAsync(payload);
     /// set cookie
-    context.res.cookie('access_token', token, {
-      domain: this.configService.get<string>('DOMAIN'),
+    response.cookie('access_token', token, {
+      domain: DOMAINS,
       httpOnly: true,
     });
     return this.exclude(admin, ['password', 'salt']);
@@ -62,17 +64,17 @@ export class AdminService {
   /**
    * login admin
    * @param loginAdminInput
-   * @param context
+   * @param response
    */
-  async loginAdmin(loginAdminInput: LoginAdminInput, context: Ctx): Promise<AdminModel> {
+  async loginAdmin(loginAdminInput: LoginAdminDto, response: Response): Promise<AdminModel> {
     const admin = await this.findOne(
         loginAdminInput.email,
         loginAdminInput.password,
     );
     const payload = { username: admin.email, sub: admin.id, role: admin.role };
     const token = await this.jwtService.signAsync(payload);
-    context.res.cookie('access_token', token, {
-      domain: this.configService.get<string>('DOMAIN'),
+    response.cookie('access_token', token, {
+      domain: DOMAINS,
       httpOnly: true,
     });
     return this.exclude(admin, ['password', 'salt']);
@@ -106,7 +108,7 @@ export class AdminService {
    */
   async updateProfile(
     id: string,
-    updateAdminInput: UpdateAdminInput,
+    updateAdminInput: UpdateAdminDto,
   ): Promise<AdminModel> {
     // console.log(updateAdminInput)
     // first find the admin
@@ -138,7 +140,7 @@ export class AdminService {
    * @param id
    * @param file
    */
-  async updateAvatar(id: string, file: FileUpload): Promise<boolean> {
+  async updateAvatar(id: string, file: Express.Multer.File): Promise<boolean> {
     // console.log(`File name > ${file.filename?.split('.')[0]}`);
     const _uploadFile = await uploadFile(
         file,
@@ -211,7 +213,7 @@ export class AdminService {
     return !!_admin;
   }
 
-  /*
+  /**
    * -------------------------------------------------------
    * ############## private methods ########################
    * -------------------------------------------------------

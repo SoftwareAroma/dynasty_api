@@ -1,6 +1,10 @@
-import * as cloudinary from 'cloudinary'
-import {CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_NAME} from "@common";
-import {FileUpload} from "graphql-upload";
+import * as cloudinary from 'cloudinary';
+import {CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_NAME} from "src/shared/common";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import {UploadApiErrorResponse, UploadApiResponse} from "cloudinary";
+import toStream = require('buffer-to-stream');
 
 
 /**
@@ -19,7 +23,7 @@ import {FileUpload} from "graphql-upload";
  * @beta
  */
 export const uploadFile = async (
-    file: FileUpload,
+    file: Express.Multer.File,
     public_id?: string,
     folderName?: string,
     tag?: string,
@@ -30,32 +34,30 @@ export const uploadFile = async (
         api_secret: CLOUDINARY_API_SECRET
     })
 
-    const uniqueFilename = new Date().toISOString()
-
-    const result = await new Promise(async (resolve, reject) : Promise<any> =>
-        file
-            .createReadStream()
-            .pipe(
-                cloudinary.v2.uploader.upload_stream(
-                    {
-                        folder: folderName ?? 'dynasty',
-                        public_id: public_id ?? uniqueFilename,
-                        tags: tag ?? 'dynasty'
-                    }, // directory and tags are optional
-                    (err, image) : void => {
-                        if (err) {
-                            reject(err)
-                        }
-                        resolve(image)
+    const uniqueFilename : string = new Date().toISOString()
+    const uploadFromBuffer = async (): Promise<
+        UploadApiResponse | UploadApiErrorResponse
+    > => {
+        return new Promise((resolve, reject): void => {
+            const upload = cloudinary.v2.uploader.upload_stream(
+                {
+                    folder: folderName ?? 'dynasty',
+                    public_id: public_id ?? uniqueFilename,
+                    tags: tag ?? 'dynasty'
+                },
+                (error, result) => {
+                    if (error) {
+                        return reject(error);
+                    } else {
+                        resolve(result);
                     }
-                )
-            )
-            .on('error', () => reject(false))
-    );
-
-    // console.log('result ', result);
-
-    return result['secure_url'];
+                },
+            );
+            toStream(file.buffer).pipe(upload);
+        });
+    };
+    const response = await uploadFromBuffer();
+    return cloudinary.v2.url(response.secure_url);
 }
 
 
@@ -67,7 +69,7 @@ export const uploadFile = async (
  * @param tag
  */
 export const uploadFiles = async (
-    files: FileUpload[],
+    files: Express.Multer.File[],
     public_ids?: string[],
     folderName?: string,
     tag?: string,
@@ -131,3 +133,25 @@ export const deleteFile = async (public_id: string) : Promise<boolean> =>  {
     });
     return !!_delete;
 }
+
+
+/**
+ * use this to store images on the local server
+ * it takes the destination path in a string format
+ * @param destination
+ */
+export const storage = (destination:string) => multer.diskStorage({
+    destination: function (req, file, cb) {
+        const folderPath = path.join(`${process.cwd()}/`, `${destination}`);
+        if(!fs.existsSync(folderPath)){
+            fs.mkdirSync(folderPath, {recursive: true});
+        }
+        cb(null, `${destination}`)
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        const ext = file.mimetype.split('/')[1]
+        console.log(file.fieldname + '-' + uniqueSuffix + '.' + ext)
+        cb(null, file.fieldname + '-' + uniqueSuffix + '.' + ext)
+    }
+});

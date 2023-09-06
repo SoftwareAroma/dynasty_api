@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {API_VERSION} from "@shared";
 
 @Injectable()
 export class AppService {
-  constructor(private configService: ConfigService) {}
+
+  /**
+   * Welcome Message to the api
+   */
   welcome(): { message: string } {
     return {
-      message: `welcome to dynasty urban style API ${this.configService.get<string>(
-        'API_VERSION',
-      )}`,
+      message: `welcome to dynasty urban style API ${API_VERSION}`,
     };
   }
 }
