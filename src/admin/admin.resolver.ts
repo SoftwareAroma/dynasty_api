@@ -1,84 +1,59 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AdminService } from "@admin/admin.service";
-import { GAdmin } from "@admin/models/admin.model";
+import { AdminResolverResponse } from "@admin/models/admin.model";
 import { CreateAdminInput } from "@admin/dto/admin.input.dto";
 import { UpdateAdminInput } from "@admin/dto/update.input.dto";
-import { IAdmin } from "@admin/interface/admin.interface";
 import { Admin as AdminModel } from "@prisma/client";
 import { LoginAdminInput } from "@admin/dto/login.input.dto";
-import { UseGuards } from "@nestjs/common";
-import { GqlAuthGuard } from "@common/guards";
-import { CheckPolicies, PoliciesGuard } from "@common";
+import {UseGuards} from "@nestjs/common";
+import { CheckPolicies, PoliciesGuard, GqlAuthGuard } from "@shared";
 import {
     DeleteAdminPolicyHandler,
     ReadAdminPolicyHandler,
     UpdateAdminPolicyHandler
 } from "@shared/casl/handler/policy.handler";
 import { GraphQLUpload } from "graphql-upload";
-import { Response } from 'express';
-import { JwtService } from '@nestjs/jwt';
-import {Ctx} from "@common/context";
+import Ctx from "@shared/context";
 
-@Resolver(() => GAdmin)
+@Resolver(() => AdminResolverResponse)
 export class AdminResolver {
     constructor(
         private readonly adminService: AdminService,
-        private readonly jwtService: JwtService,
-        // private readonly configService: ConfigService,
     ) { }
 
     /**
      * create admin
      * @param createAdminInput
-     * @param response
+     * @param context
      */
-    @Mutation(() => GAdmin, { name: "createAdmin" })
+    @Mutation(() => AdminResolverResponse, { name: "createAdmin" })
     async createAdmin(
         @Args('createAdminInput') createAdminInput: CreateAdminInput,
-        @Context('res') response: Response,
-    ): Promise<IAdmin> {
-        const admin : AdminModel = await this.adminService.register(createAdminInput);
-        const payload = { username: admin.email, sub: admin.id, role: admin.role };
-        const token : string = await this.jwtService.signAsync(payload);
-        response.cookie('access_token', token, {
-            // domain: this.configService.get<string>('DOMAIN'),
-            httpOnly: true,
-            // sameSite: 'none',
-            // secure: true,
-        });
-        return admin;
+        @Context() context: Ctx,
+    ): Promise<{access_token:string}> {
+        return await this.adminService.register(createAdminInput, context);
     }
 
     /**
      * login admin
      * @param loginAdminInput
-     * @param response
+     * @param context
      */
-    @Mutation(() => GAdmin, { name: "loginAdmin" })
+    @Mutation(() => AdminResolverResponse, { name: "loginAdmin" })
     async loginAdmin(
         @Args('loginAdminInput') loginAdminInput: LoginAdminInput,
-        // @Context() context: Ctx,
-        @Context('res') response: Response,
-    ): Promise<AdminModel> {
-        const admin : AdminModel = await this.adminService.loginAdmin(loginAdminInput);
-        const payload = { username: admin.email, sub: admin.id, role: admin.role };
-        const token : string = await this.jwtService.signAsync(payload);
-        response.cookie('access_token', token, {
-            // domain: this.configService.get<string>('DOMAIN'),
-            httpOnly: true,
-            // sameSite: 'none',
-            // secure: true,
-        });
-        return admin;
+        @Context() context: Ctx,
+    ): Promise<{access_token:string}> {
+        return await this.adminService.loginAdmin(loginAdminInput, context);
     }
 
     /**
      * get all admins
      */
-    @Query(() => [GAdmin], { name: "getAdmins" })
+    @Query(() => [AdminResolverResponse], { name: "getAdmins" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
-    async admins(): Promise<IAdmin[]> {
+    async admins(): Promise<AdminModel[]> {
         return await this.adminService.getAdmins();
     }
 
@@ -86,10 +61,10 @@ export class AdminResolver {
      * get admin profile
      * @param context
      */
-    @Query(() => GAdmin, { name: "getAdminProfile" })
+    @Query(() => AdminResolverResponse, { name: "getAdminProfile" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
-    async profile(@Context() context: Ctx): Promise<IAdmin> {
+    async profile(@Context() context: Ctx): Promise<AdminModel> {
         // console.log(context.req.user);
         const user: any = context.req.user;
         return this.adminService.getProfile(user.id);
@@ -99,10 +74,10 @@ export class AdminResolver {
      * get admin by id
      * @param id
      */
-    @Query(() => GAdmin, { name: "getAdminById" })
+    @Query(() => AdminResolverResponse, { name: "getAdminById" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
-    async admin(@Args('id') id: string): Promise<IAdmin> {
+    async admin(@Args('id') id: string): Promise<AdminModel> {
         return await this.adminService.getProfile(id);
     }
 
@@ -140,13 +115,13 @@ export class AdminResolver {
      * @param id
      * @param updateAdminInput
      */
-    @Mutation(() => GAdmin, { name: "updateAdmin" })
+    @Mutation(() => AdminResolverResponse, { name: "updateAdmin" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateAdminPolicyHandler())
     async updateAdminProfile(
         @Args('id') id: string,
         @Args('updateAdminInput') updateAdminInput: UpdateAdminInput,
-    ): Promise<IAdmin> {
+    ): Promise<AdminModel> {
         return await this.adminService.updateProfile(id, updateAdminInput)
     }
 

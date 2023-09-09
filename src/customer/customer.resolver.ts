@@ -1,14 +1,13 @@
 import {Args, Context, Mutation, Query, Resolver} from '@nestjs/graphql';
 import {GCustomer} from "@customer/model/customer.model";
 import {CustomerService} from "@customer/customer.service";
-import {Ctx} from "@common/context";
-import {ICustomer} from "@customer/interface/customer.interface";
+import Ctx from "@shared/context";
 import {CreateCustomerInput} from "@customer/dto/customer.input.dto";
 import {LoginCustomerInput} from "@customer/dto/login.input.dto";
 import {UpdateCustomerInput} from "@customer/dto/update.input.dto";
 import {UseGuards} from "@nestjs/common";
-import {GqlAuthGuard} from "@common/guards";
-import {CheckPolicies, PoliciesGuard} from "@common";
+import {GqlAuthGuard} from "@shared/guards";
+import {CheckPolicies, PoliciesGuard} from "@shared";
 import {
     ReadCustomerPolicyHandler,
     UpdateCustomerPolicyHandler,
@@ -31,8 +30,8 @@ export class CustomerResolver {
     @Mutation(() => GCustomer, {name: "createCustomer"})
     async createCustomer(
         @Args("createCustomerInput") createCustomerInput: CreateCustomerInput,
-        @Context() context: Ctx,
-    ): Promise<ICustomer> {
+        @Context() context: Ctx ,
+    ): Promise<{access_token:string}> {
         return await this.customerService.register(createCustomerInput, context);
     }
 
@@ -41,7 +40,7 @@ export class CustomerResolver {
     async loginCustomer(
         @Args("loginCustomerInput") loginCustomerInput: LoginCustomerInput,
         @Context() context: Ctx,
-    ): Promise<ICustomer> {
+    ): Promise<{access_token:string}> {
         return await this.customerService.loginCustomer(loginCustomerInput, context);
     }
 
@@ -49,7 +48,7 @@ export class CustomerResolver {
     @Query(() => [GCustomer], {name: "getCustomers"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadCustomerPolicyHandler())
-    async getCustomers(): Promise<ICustomer[]> {
+    async getCustomers(): Promise<CustomerModel[]> {
         return await this.customerService.getCustomers();
     }
 
@@ -58,7 +57,7 @@ export class CustomerResolver {
     @CheckPolicies(new ReadCustomerPolicyHandler())
     async getCustomerProfile(
         @Context() context: Ctx,
-    ): Promise<ICustomer> {
+    ): Promise<CustomerModel> {
         // console.log(context.req.user);
         const user:any = context.req.user;
         return await this.customerService.getProfile(user.id);
@@ -68,14 +67,27 @@ export class CustomerResolver {
     @Query(() => GCustomer, {name: "getCustomerById"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadCustomerPolicyHandler())
-    async getCustomer(
+    async getCustomerById(
         @Args('id') id: string,
-    ): Promise<ICustomer> {
+    ): Promise<CustomerModel> {
         return await this.customerService.getProfile(id);
     }
 
+    /// update customer
+    @Mutation(() => GCustomer, {name: "updateCustomer"})
+    @UseGuards(GqlAuthGuard, PoliciesGuard)
+    @CheckPolicies(new UpdateCustomerPolicyHandler())
+    async updateCustomer(
+        @Args('id') id: string,
+        @Args("updateCustomerInput") updateCustomerInput: UpdateCustomerInput,
+    ): Promise<CustomerModel> {
+        const _customer: CustomerModel = await this.customerService.updateProfile(id, updateCustomerInput);
+        await pubSub.publish('customerUpdated', {userUpdated: _customer});
+        return _customer;
+    }
+
     /// update avatar
-    @Mutation(() => Boolean)
+    @Mutation(() => Boolean, {name: "updateCustomerAvatar"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateCustomerPolicyHandler())
     async updateCustomerAvatar(
@@ -97,48 +109,35 @@ export class CustomerResolver {
         return _customer;
     }
 
-    /// update customer
-    @Mutation(() => GCustomer, {name: "updateCustomer"})
-    @UseGuards(GqlAuthGuard, PoliciesGuard)
-    @CheckPolicies(new UpdateCustomerPolicyHandler())
-    async updateCustomerProfile(
-        @Args('id') id: string,
-        @Args("updateCustomerInput") updateCustomerInput: UpdateCustomerInput,
-    ): Promise<ICustomer> {
-        const _customer: CustomerModel = await this.customerService.updateProfile(id, updateCustomerInput);
-        await pubSub.publish('customerUpdated', {userUpdated: _customer});
-        return _customer;
-    }
-
     /// add to cart
-    @Mutation(() => GCustomer, {name: "updateCustomer"})
+    @Mutation(() => GCustomer, {name: "addToCustomerCart"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateCustomerPolicyHandler())
-    async addToCart(
+    async addToCustomerCart(
         @Args('id') id: string,
         @Args("createCartInput") createCartInput: CreateCartInput,
-    ): Promise<ICustomer> {
+    ): Promise<CustomerModel> {
         const _customer : CustomerModel = await this.customerService.addToCart(id, createCartInput);
         await pubSub.publish('customerUpdated', {userUpdated: _customer});
         return _customer;
     }
 
     /// update cart
-    @Mutation(() => GCustomer, {name: "updateCustomer"})
+    @Mutation(() => GCustomer, {name: "updateCustomerCart"})
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new UpdateCustomerPolicyHandler())
-    async updateCart(
+    async updateCustomerCart(
         @Args('id') id: string,
         @Args('cartId') cartId: string,
         @Args("updateCartInput") updateCartInput: UpdateCartInput,
-    ): Promise<ICustomer> {
+    ): Promise<CustomerModel> {
         const _customer : CustomerModel = await this.customerService.updateCart(id, cartId, updateCartInput);
         await pubSub.publish('customerUpdated', {userUpdated: _customer});
         return _customer;
     }
 
     /// log out customer
-    @Query(() => GCustomer, {name: "logoutCustomer"})
+    @Query(() => Boolean, {name: "logoutCustomer"})
     async logoutCustomer(
         @Context() context: Ctx,
     ): Promise<boolean> {

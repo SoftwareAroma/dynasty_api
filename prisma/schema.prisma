@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  // url      = "postgresql://postgres:admin@postgres_prisma:5432/dynasty_api?schema=database&sslmode=prefer"
 }
 
 model Admin {
@@ -34,7 +33,7 @@ model Customer {
   userName  String
   phone     String
   salt      String?
-  Cart      Cart[]
+  cart      Cart[]
   avatar    String?  @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")
   role      Role     @default(USER)
   isAdmin   Boolean  @default(false)

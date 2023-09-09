@@ -1,4 +1,3 @@
-// cart.model.ts
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import {GCustomer} from "@customer/model/customer.model";
 import {GProduct} from "@product/model/product.model";

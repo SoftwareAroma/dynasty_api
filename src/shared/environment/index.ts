@@ -16,7 +16,7 @@ const JWT_SECRET : string = process.env.JWT_SECRET
 const JWT_ALGORITHM : string = process.env.JWT_ALGORITHM
 const JWT_EXPIRES_IN : string = process.env.JWT_EXPIRES_IN
 
-export default () => ({
+export const configuration = () => ({
   PORT,
   DOMAINS,
   DATABASE_URL,

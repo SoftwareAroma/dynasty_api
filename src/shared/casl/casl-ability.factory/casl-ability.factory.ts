@@ -9,7 +9,7 @@ import {
     Employee as EmployeeModel,
 } from '@prisma/client';
 import { createPrismaAbility, PrismaQuery, Subjects } from '@casl/prisma';
-import { Role, Action } from '@common';
+import { Role, Action } from '@shared';
 
 export type AppAbility = PureAbility<
   [

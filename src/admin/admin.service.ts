@@ -1,29 +1,27 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword } from '@common';
+import {comparePassword, deleteFile, generateSalt, getDefaultPropertyValue, hashPassword, uploadFile} from '@shared';
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { CreateAdminInput } from "@admin/dto/admin.input.dto";
 import { LoginAdminInput } from "@admin/dto/login.input.dto";
 import { UpdateAdminInput } from "@admin/dto/update.input.dto";
-import { Ctx } from "@common/context";
-import { ConfigService } from "@nestjs/config";
 import { Admin as AdminModel } from "@prisma/client";
-import { deleteFile, uploadFile } from "@shared";
 import { FileUpload } from "graphql-upload";
+import {JwtService} from "@nestjs/jwt";
+import Ctx from "@shared/context";
 
 @Injectable()
 export class AdminService {
   constructor(
     private prismaService: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
   ) { }
 
   /**
    * create admin
    * @param createAdminInput
+   * @param context
    */
-  async register(createAdminInput: CreateAdminInput): Promise<AdminModel> {
+  async register(createAdminInput: CreateAdminInput, context: Ctx): Promise<{access_token:string}> {
     // check if email already exists
     const emailExists = await this.prismaService.admin.findUnique({
       where: { email: createAdminInput.email },
@@ -46,20 +44,37 @@ export class AdminService {
     const admin: AdminModel = await this.prismaService.admin.create({
       data: createAdminInput,
     });
-    return this.exclude(admin, ['password', 'salt']);
+    const payload = { username: admin.email, sub: admin.id, role: admin.role };
+    const token : string = await this.jwtService.signAsync(payload);
+    context.res.cookie('access_token', token, {
+      // domain: this.configService.get<string>('DOMAIN'),
+      httpOnly: true,
+      // sameSite: 'none',
+      // secure: true,
+    });
+    return {"access_token":token};
   }
 
   /**
    * login admin
    * @param loginAdminInput
+   * @param context
    */
-  async loginAdmin(loginAdminInput: LoginAdminInput): Promise<AdminModel> {
+  async loginAdmin(loginAdminInput: LoginAdminInput, context: Ctx): Promise<{access_token:string}> {
     const admin = await this.findOne(
       loginAdminInput.email,
       loginAdminInput.password,
     );
+    const payload = { username: admin.email, sub: admin.id, role: admin.role };
+    const token : string = await this.jwtService.signAsync(payload);
+    context.res.cookie('access_token', token, {
+      // domain: this.configService.get<string>('DOMAIN'),
+      httpOnly: true,
+      // sameSite: 'none',
+      // secure: true,
+    });
     // log the response cookie
-    return this.exclude(admin, ['password', 'salt']);
+    return {"access_token":token};
   }
 
   /**
@@ -195,7 +210,7 @@ export class AdminService {
     return !!_admin;
   }
 
-  /*
+  /**
    * -------------------------------------------------------
    * ############## private methods ########################
    * -------------------------------------------------------

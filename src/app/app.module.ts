@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import configuration from '@common';
+import {configuration} from '@shared';
 import { AdminModule } from '@admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
@@ -53,7 +53,7 @@ import { join } from 'path';
       uploads: false,
       plugins: [
         ApolloServerPluginLandingPageLocalDefault()
-      ],
+      ], 
       debug: true,
       cors: {
         origin: true,

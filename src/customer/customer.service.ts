@@ -1,9 +1,17 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { Customer as CustomerModel } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
-import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword} from '@common';
+import {
+  comparePassword,
+  deleteFile,
+  DOMAINS,
+  generateSalt,
+  getDefaultPropertyValue,
+  hashPassword,
+  uploadFile
+} from '@shared';
 import { PrismaService } from '@shared/prisma/prisma.service';
-import {Ctx} from "@common/context";
+import Ctx from "@shared/context";
 import {ConfigService} from "@nestjs/config";
 import {CreateCustomerInput} from "@customer/dto/customer.input.dto";
 import {LoginCustomerInput} from "@customer/dto/login.input.dto";
@@ -11,7 +19,6 @@ import {UpdateCustomerInput} from "@customer/dto/update.input.dto";
 import {CreateCartInput} from "@customer/dto/cart.input.dto";
 import {UpdateCartInput} from "@customer/dto/cart.update.dto";
 import {FileUpload} from "graphql-upload";
-import {deleteFile, uploadFile} from "@shared";
 
 @Injectable()
 export class CustomerService {
@@ -26,7 +33,7 @@ export class CustomerService {
    * @param createCustomerInput
    * @param context
    */
-  async register(createCustomerInput: CreateCustomerInput, context:Ctx): Promise<CustomerModel> {
+  async register(createCustomerInput: CreateCustomerInput, context:Ctx): Promise<{ access_token: string }> {
     // check if email already exists
     const emailExists = await this.prismaService.customer.findUnique({
       where: { email: createCustomerInput.email },
@@ -48,17 +55,17 @@ export class CustomerService {
     // create a new user
     const _customer: CustomerModel = await this.prismaService.customer.create({
       data: createCustomerInput,
-      include: {Cart: true}
+      include: {cart: true}
     });
     // generate a token
     const payload = { sub: _customer.id, username: _customer.email, role: _customer.role };
     const token = await this.jwtService.signAsync(payload);
     /// set cookie
     context.res.cookie('access_token', token, {
-      domain: this.configService.get<string>('DOMAIN'),
+      domain: DOMAINS,
       httpOnly: true,
     });
-    return this.exclude(_customer, ['password', 'salt']);
+    return {"access_token":token}
   }
 
   /**
@@ -66,10 +73,10 @@ export class CustomerService {
    * @param loginCustomerDto
    * @param context
    */
-  async loginCustomer(loginCustomerDto: LoginCustomerInput, context:Ctx): Promise<CustomerModel> {
+  async loginCustomer(loginCustomerDto: LoginCustomerInput, context:Ctx): Promise<{ access_token: string }> {
     const customer = await this.prismaService.customer.findUnique({
       where: { email: loginCustomerDto.email },
-      include: {Cart: true}
+      include: {cart: true}
     });
     if (!customer) {
       throw new HttpException('No record found for this email', HttpStatus.BAD_REQUEST);
@@ -87,7 +94,7 @@ export class CustomerService {
       domain: this.configService.get<string>('DOMAIN'),
       httpOnly: true,
     });
-    return this.exclude(customer, ['password', 'salt']);
+    return {"access_token":token}
   }
   
 
@@ -99,7 +106,7 @@ export class CustomerService {
     // console.log("Customer Id ", id);
     const customer: CustomerModel = await this.prismaService.customer.findUnique({
       where: { id: id },
-      include: {Cart: true}
+      include: {cart: true}
     });
     if (!customer) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -112,7 +119,7 @@ export class CustomerService {
    */
   async getCustomers(): Promise<CustomerModel[]> {
     const _customers: CustomerModel[] = await this.prismaService.customer.findMany({
-        include: {Cart: true}
+        include: {cart: true}
     });
     _customers.forEach((_customer) =>
       this.exclude(_customer, ['password', 'salt']),
@@ -148,12 +155,12 @@ export class CustomerService {
     return this.prismaService.customer.update({
       where: { id: id },
       data: {
-        Cart: {
+        cart: {
           create: cartInput,
         },
       },
       include: {
-        Cart: true,
+        cart: true,
       },
     });
   }
@@ -167,7 +174,7 @@ export class CustomerService {
     return this.prismaService.customer.update({
       where: { id: customerId },
       data: {
-        Cart: {
+        cart: {
           update: {
             where: { id: cartId },
             data: updateCartInput,
@@ -175,7 +182,7 @@ export class CustomerService {
         },
       },
       include: {
-        Cart: true,
+        cart: true,
       },
     });
   }

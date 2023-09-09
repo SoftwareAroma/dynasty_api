@@ -1,5 +1,5 @@
 import * as cloudinary from 'cloudinary'
-import {CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_NAME} from "@common";
+import {CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_NAME} from "@shared";
 import {FileUpload} from "graphql-upload";
 
 
@@ -131,3 +131,19 @@ export const deleteFile = async (public_id: string) : Promise<boolean> =>  {
     });
     return !!_delete;
 }
+
+// export const storage = (destination:string) => multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         const folderPath = path.join(`${process.cwd()}/`, `${destination}`);
+//         if(!fs.existsSync(folderPath)){
+//             fs.mkdirSync(folderPath, {recursive: true});
+//         }
+//         cb(null, `${destination}`)
+//     },
+//     filename: function (req, file, cb) {
+//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+//         const ext = file.mimetype.split('/')[1]
+//         console.log(file.fieldname + '-' + uniqueSuffix + '.' + ext)
+//         cb(null, file.fieldname + '-' + uniqueSuffix + '.' + ext)
+//     }
+// });

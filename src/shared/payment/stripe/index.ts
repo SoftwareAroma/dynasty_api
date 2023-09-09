@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import {STRIPE_SECRET_KEY} from "@common/environment";
+import {STRIPE_SECRET_KEY} from "src/shared/environment";
 
 export const stripe : Stripe = new Stripe(STRIPE_SECRET_KEY, {
     apiVersion: "2022-11-15",

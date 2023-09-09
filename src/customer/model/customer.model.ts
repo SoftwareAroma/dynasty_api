@@ -1,5 +1,5 @@
 import {ObjectType, Field} from '@nestjs/graphql';
-import {Role} from "@common";
+import {Role} from "@shared";
 import {GCart} from "@customer/model/cart.model";
 
 @ObjectType()

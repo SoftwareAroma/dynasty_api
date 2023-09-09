@@ -5,9 +5,9 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { graphqlUploadExpress } from "graphql-upload";
-import {DOMAINS, PORT} from "@common";
+import { DOMAINS, PORT } from "@shared";
 
-/*
+/**
  * The main function that bootstraps the app
  * takes no arguments and returns void
  * It creates an instance of the Nest application
@@ -61,7 +61,7 @@ const bootstrap = async (): Promise<void> => {
   /**
    * Start the app
    */
-  const port : number = PORT;
+  const port: number = PORT;
   await app
     .listen(port)
     .then((): void => {

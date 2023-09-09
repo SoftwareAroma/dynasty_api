@@ -1,5 +1,5 @@
 import {ObjectType, Field, Int, Float, ID} from '@nestjs/graphql';
-import {PriceType} from "@common";
+import {PriceType} from "@shared";
 import GraphQLJSON from "graphql-type-json";
 
 @ObjectType()

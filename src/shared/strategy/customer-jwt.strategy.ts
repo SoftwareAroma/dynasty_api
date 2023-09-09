@@ -4,7 +4,7 @@ import {PassportStrategy} from '@nestjs/passport';
 import {Request} from 'express';
 import {CustomerService} from '@customer/customer.service';
 import {Customer as CustomerModel} from "@prisma/client";
-import {JWT_SECRET} from "@common";
+import {JWT_SECRET} from "@shared";
 
 @Injectable()
 export class CustomerJwtStrategy extends PassportStrategy(Strategy) {

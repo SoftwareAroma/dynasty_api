@@ -2,11 +2,9 @@ import {Args, Mutation, Query, Resolver} from '@nestjs/graphql';
 import {PubSub} from "graphql-subscriptions";
 import {GProduct} from "@product/model/product.model";
 import {ProductService} from "@product/product.service";
-import {IProduct} from "@product/interface/product.interface";
 import {CreateProductInput} from "@product/dto/product.input.dto";
 import {UseGuards} from "@nestjs/common";
-import {GqlAuthGuard} from "@common/guards";
-import {CheckPolicies, PoliciesGuard} from "@common";
+import {CheckPolicies, GqlAuthGuard, PoliciesGuard} from "@shared";
 import {
     CreateProductPolicyHandler,
     DeleteProductPolicyHandler,
@@ -39,7 +37,7 @@ export class ProductResolver {
     async createProduct(
         @Args('createProductInput') createProductInput: CreateProductInput,
         @Args('files', { type: () => [GraphQLUpload] }) files: Array<Promise<FileUpload>>,
-    ): Promise<IProduct> {
+    ): Promise<ProductModel> {
         const resolvedFiles: FileUpload[] = await Promise.all(files); // Wait for all promises to resolve
         // console.log(resolvedFiles)
         // const _productDto = this.formatInput(createProductInput);
@@ -52,7 +50,7 @@ export class ProductResolver {
      * get products
      */
     @Query(() => [GProduct], { name: 'getProducts' })
-    async getProducts(): Promise<IProduct[]> {
+    async getProducts(): Promise<ProductModel[]> {
         return this.productService.getProducts();
     }
 
@@ -61,7 +59,7 @@ export class ProductResolver {
      * @param id
      */
     @Query(() => GProduct, { name: 'getProductById' })
-    async getProductById(@Args('id') id: string): Promise<IProduct> {
+    async getProductById(@Args('id') id: string): Promise<ProductModel> {
         return this.productService.getProductById(id);
     }
 
@@ -70,7 +68,7 @@ export class ProductResolver {
      * @param name
      */
     @Query(() => GProduct, { name: 'getProductByName' })
-    async getProductByName(@Args('name') name: string): Promise<IProduct> {
+    async getProductByName(@Args('name') name: string): Promise<ProductModel> {
         return this.productService.getProductByName(name);
     }
 
@@ -87,7 +85,7 @@ export class ProductResolver {
         @Args('id') id: string,
         @Args('files', { type: () => GraphQLUpload }) files: Array<FileUpload>,
         @Args('updateProductInput') updateProductInput: UpdateProductInput,
-    ): Promise<IProduct> {
+    ): Promise<ProductModel> {
         // const _productDto = this.formatInput(updateProductInput);
         const product: ProductModel = await this.productService.updateProduct(id, updateProductInput, files);
         await pubSub.publish('productUpdated', { productUpdated: product });
@@ -115,7 +113,7 @@ export class ProductResolver {
      * delete product by id
      * @param id
      */
-    @Mutation(() => Boolean, { name: 'deleteProduct' })
+    @Mutation(() => Boolean, { name: 'deleteProductById' })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new DeleteProductPolicyHandler())
     async deleteProductById(@Args('id') id: string): Promise<boolean> {
@@ -126,12 +124,12 @@ export class ProductResolver {
      * format input
      * @param input
      */
-    private formatInput = (input: CreateProductInput | UpdateProductInput): any => {
-        // convert price string to json object
-        input.price = JSON.parse(input.price.toString());
-        input.numInStock = parseInt(input.numInStock ? input.numInStock.toString() : "0", 10);
-        input.numReviews = parseInt(input.numReviews != null ? input.numReviews.toString() : "0", 10);
-        input.rating = parseInt(input.rating != null ? input.rating?.toString() : "0", 10);
-        return input;
-    }
+    // private formatInput = (input: CreateProductInput | UpdateProductInput): any => {
+    //     // convert price string to json object
+    //     input.price = JSON.parse(input.price.toString());
+    //     input.numInStock = parseInt(input.numInStock ? input.numInStock.toString() : "0", 10);
+    //     input.numReviews = parseInt(input.numReviews != null ? input.numReviews.toString() : "0", 10);
+    //     input.rating = parseInt(input.rating != null ? input.rating?.toString() : "0", 10);
+    //     return input;
+    // }
 }

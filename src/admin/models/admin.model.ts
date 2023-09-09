@@ -1,8 +1,8 @@
 import {ObjectType, Field} from '@nestjs/graphql';
-import {Role} from "@common";
+import {Role} from "@shared";
 
 @ObjectType()
-export class GAdmin {
+export class AdminResolverResponse {
     @Field(() => String)
     id: string;
 
