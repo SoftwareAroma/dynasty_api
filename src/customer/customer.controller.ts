@@ -11,27 +11,28 @@ import {
   UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {CustomerService} from '@customer/customer.service';
-import {Response} from 'express';
-import {UpdateCartDto, UpdateCustomerDto} from '@customer/dto/update.dto';
-import {Customer as CustomerModel} from '@prisma/client';
-import {LoginCustomerDto} from '@customer/dto/login.dto';
-import {CreateCartDto, CreateCustomerDto} from '@customer/dto/create.dto';
-import {FileInterceptor} from '@nestjs/platform-express';
+import { CustomerService } from '@customer/customer.service';
+import { Response } from 'express';
+import { UpdateCartDto, UpdateCustomerDto } from '@customer/dto/update.dto';
+import { Customer as CustomerModel } from '@prisma/client';
+import { LoginCustomerDto } from '@customer/dto/login.dto';
+import { CreateCartDto, CreateCustomerDto } from '@customer/dto/create.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  API_URI_VERSION,
   CheckPolicies,
   DeleteCustomerPolicyHandler,
   JwtAuthGuard,
   ReadCustomerPolicyHandler,
   UpdateCustomerPolicyHandler
 } from "@shared";
-import {PoliciesGuard} from "@shared/secure/policy.guard";
+import { PoliciesGuard } from "@shared/secure/policy.guard";
 
-@Controller({ path: 'customer', version: '1' })
+@Controller({ path: 'customer', version: API_URI_VERSION })
 export class CustomerController {
   constructor(
     private readonly customerService: CustomerService,
-  ) {}
+  ) { }
 
   /**
    * register a customer
@@ -136,8 +137,8 @@ export class CustomerController {
   @CheckPolicies(new UpdateCustomerPolicyHandler())
   @Patch('cart/:id')
   async addToCart(
-      @Param('id') id: string,
-      @Body() createCartDto: CreateCartDto,
+    @Param('id') id: string,
+    @Body() createCartDto: CreateCartDto,
   ): Promise<CustomerModel> {
     return await this.customerService.addToCart(id, createCartDto);
   }
@@ -152,9 +153,9 @@ export class CustomerController {
   @CheckPolicies(new UpdateCustomerPolicyHandler())
   @Patch('update-cart/:id/:cartId')
   async updateCart(
-      @Param('id') id: string,
-      @Param('cartId') cartId: string,
-      @Body() updateCartDto: UpdateCartDto,
+    @Param('id') id: string,
+    @Param('cartId') cartId: string,
+    @Body() updateCartDto: UpdateCartDto,
   ): Promise<CustomerModel> {
     return await this.customerService.updateCart(id, cartId, updateCartDto);
   }

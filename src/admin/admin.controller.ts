@@ -18,18 +18,19 @@ import { Response } from 'express';
 import { LoginAdminDto } from '@admin/dto/login.dto';
 import { UpdateAdminDto } from '@admin/dto/update.dto';
 import {
+  API_URI_VERSION,
   CheckPolicies, DeleteAdminPolicyHandler,
   JwtAuthGuard, ReadAdminPolicyHandler, UpdateAdminPolicyHandler,
 } from '@shared';
 import { Admin as AdminModel } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
-import {PoliciesGuard} from "@shared/secure/policy.guard";
+import { PoliciesGuard } from "@shared/secure/policy.guard";
 
-@Controller({ path: 'admin', version: '1' })
+@Controller({ path: 'admin', version: API_URI_VERSION })
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-  ) {}
+  ) { }
 
   /**
    * create an admin

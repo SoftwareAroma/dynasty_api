@@ -3,9 +3,9 @@ import { AppModule } from '@app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import {ValidationPipe, VersioningType} from '@nestjs/common';
-import {DocumentBuilder, OpenAPIObject, SwaggerModule} from "@nestjs/swagger";
-import {API_VERSION, PORT, SWAGGER_PATH} from "@shared";
+import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { DocumentBuilder, OpenAPIObject, SwaggerModule } from "@nestjs/swagger";
+import { API_VERSION, DOMAINS, PORT, SWAGGER_PATH } from "@shared";
 
 /**
  * The main function that bootstraps the app
@@ -18,7 +18,7 @@ const bootstrap = async (): Promise<void> => {
   });
   app.enableShutdownHooks();
   /// global prefix
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
 
   /**
    *  APP VERSIONING
@@ -32,10 +32,10 @@ const bootstrap = async (): Promise<void> => {
    * it is not recommended to use the wildcard * for production
    */
   app.enableCors({
-    origin: "*",
+    origin: DOMAINS,
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
+    // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    // preflightContinue: false,
   });
 
   /**
@@ -57,9 +57,9 @@ const bootstrap = async (): Promise<void> => {
    * Enable validation pipe
    */
   app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-      }),
+    new ValidationPipe({
+      whitelist: true,
+    }),
   );
 
   /**
@@ -68,12 +68,12 @@ const bootstrap = async (): Promise<void> => {
    * ###########################################################
    * */
   const config: Omit<OpenAPIObject, any> = new DocumentBuilder()
-      .setTitle(`DYNASTY URBAN STYLE API version ${API_VERSION}`)
-      .setDescription(
-          'This is the backend api interface for the DYNASTY URBAN STYLE web project',
-      )
-      .setVersion(`${API_VERSION}`)
-      .build();
+    .setTitle(`DYNASTY URBAN STYLE API version ${API_VERSION}`)
+    .setDescription(
+      'This is the backend api interface for the DYNASTY URBAN STYLE web project',
+    )
+    .setVersion(`${API_VERSION}`)
+    .build();
 
   const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
   // path for swagger

@@ -18,13 +18,13 @@ import {
 } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateEmployeeDto } from './dto/update.dto';
-import {CheckPolicies, CreateEmployeePolicyHandler, DeleteEmployeePolicyHandler, JwtAuthGuard} from "@shared";
-import {PoliciesGuard} from "@shared/secure/policy.guard";
+import { API_URI_VERSION, CheckPolicies, CreateEmployeePolicyHandler, DeleteEmployeePolicyHandler, JwtAuthGuard } from "@shared";
+import { PoliciesGuard } from "@shared/secure/policy.guard";
 
 
-@Controller({ path: 'employee', version: '1' })
+@Controller({ path: 'employee', version: API_URI_VERSION })
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(private readonly employeeService: EmployeeService) { }
 
   /**
    * create an employee for the shop in the database
