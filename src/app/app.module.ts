@@ -1,7 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import {configuration} from '@shared';
+import {
+  configuration,
+  GqlExceptionFilter,
+  HttpExceptionFilter,
+  JwtStrategy,
+  PrismaClientExceptionFilter
+} from '@shared';
 import { AdminModule } from '@admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
@@ -14,11 +20,6 @@ import { AppResolver } from './app.resolver';
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver } from "@nestjs/apollo";
 import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
-import {
-  GqlExceptionFilter,
-  HttpExceptionFilter,
-  PrismaClientExceptionFilter
-} from "@shared";
 import { join } from 'path';
 
 @Module({
@@ -53,7 +54,7 @@ import { join } from 'path';
       uploads: false,
       plugins: [
         ApolloServerPluginLandingPageLocalDefault()
-      ], 
+      ],
       debug: true,
       cors: {
         origin: true,
@@ -86,7 +87,7 @@ import { join } from 'path';
   providers: [
     AppService,
     AppResolver,
-    // JwtStrategy,
+    JwtStrategy,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

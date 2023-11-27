@@ -43,3 +43,9 @@ export class AdminResolverResponse {
     @Field({ nullable: true })
     updatedAt?: Date;
 }
+
+@ObjectType()
+export class AdminAuthResponse {
+    @Field()
+    access_token: string;
+}

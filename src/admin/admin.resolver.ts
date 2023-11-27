@@ -1,6 +1,6 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AdminService } from "@admin/admin.service";
-import { AdminResolverResponse } from "@admin/models/admin.model";
+import {AdminResolverResponse, AdminAuthResponse} from "@admin/models/admin.model";
 import { CreateAdminInput } from "@admin/dto/admin.input.dto";
 import { UpdateAdminInput } from "@admin/dto/update.input.dto";
 import { Admin as AdminModel } from "@prisma/client";
@@ -13,7 +13,6 @@ import {
     UpdateAdminPolicyHandler
 } from "@shared/casl/handler/policy.handler";
 import { GraphQLUpload } from "graphql-upload";
-import Ctx from "@shared/context";
 
 @Resolver(() => AdminResolverResponse)
 export class AdminResolver {
@@ -26,10 +25,10 @@ export class AdminResolver {
      * @param createAdminInput
      * @param context
      */
-    @Mutation(() => AdminResolverResponse, { name: "createAdmin" })
+    @Mutation(() => AdminAuthResponse, { name: "createAdmin" })
     async createAdmin(
         @Args('createAdminInput') createAdminInput: CreateAdminInput,
-        @Context() context: Ctx,
+        @Context() context: any,
     ): Promise<{access_token:string}> {
         return await this.adminService.register(createAdminInput, context);
     }
@@ -39,10 +38,10 @@ export class AdminResolver {
      * @param loginAdminInput
      * @param context
      */
-    @Mutation(() => AdminResolverResponse, { name: "loginAdmin" })
+    @Mutation(() => AdminAuthResponse, { name: "loginAdmin" })
     async loginAdmin(
         @Args('loginAdminInput') loginAdminInput: LoginAdminInput,
-        @Context() context: Ctx,
+        @Context() context: any,
     ): Promise<{access_token:string}> {
         return await this.adminService.loginAdmin(loginAdminInput, context);
     }
@@ -64,7 +63,7 @@ export class AdminResolver {
     @Query(() => AdminResolverResponse, { name: "getAdminProfile" })
     @UseGuards(GqlAuthGuard, PoliciesGuard)
     @CheckPolicies(new ReadAdminPolicyHandler())
-    async profile(@Context() context: Ctx): Promise<AdminModel> {
+    async profile(@Context() context: any): Promise<AdminModel> {
         // console.log(context.req.user);
         const user: any = context.req.user;
         return this.adminService.getProfile(user.id);

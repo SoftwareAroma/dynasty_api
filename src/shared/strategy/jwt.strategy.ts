@@ -24,7 +24,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         }else{
           return request.headers.cookie;
         }
-
       },
       ignoreExpiration: false,
       secretOrKey: JWT_SECRET,

@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { graphqlUploadExpress } from "graphql-upload";
-import { DOMAINS, PORT } from "@shared";
+import { PORT } from "@shared";
 
 /**
  * The main function that bootstraps the app
@@ -32,10 +31,10 @@ const bootstrap = async (): Promise<void> => {
    * it is not recommended to use the wildcard * for production
    */
   app.enableCors({
-    origin: DOMAINS,
+    origin: "*",
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
+    // preflightContinue: false,
   });
 
   /**
@@ -46,12 +45,12 @@ const bootstrap = async (): Promise<void> => {
   /**
    * Enable helmet
    */
-  app.use(
-    helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
-    }),
-  );
+  // app.use(
+  //   helmet({
+  //     contentSecurityPolicy: false,
+  //     crossOriginEmbedderPolicy: false,
+  //   }),
+  // );
 
   /**
    * Enable validation pipe
