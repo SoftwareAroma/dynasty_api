@@ -2,6 +2,10 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AdminAuthResponse {
+  access_token: String!
+}
+
 type AdminResolverResponse {
   avatar: String
   createdAt: DateTime
@@ -85,6 +89,10 @@ input CreateProductInput {
   rating: Float = 0
   sizes: [String!]!
   updatedAt: DateTime
+}
+
+type CustomerAuthResponse {
+  access_token: String!
 }
 
 """
@@ -184,8 +192,8 @@ type Mutation {
   addToCustomerCart(createCartInput: CreateCartInput!, id: String!): GCustomer!
   clockInEmployee(clockInInput: CreateAttendanceInput!, id: String!): GEmployee!
   clockOutEmployee(attendanceId: String!, clockOutInput: UpdateAttendanceInput!, employeeId: String!): GEmployee!
-  createAdmin(createAdminInput: CreateAdminInput!): AdminResolverResponse!
-  createCustomer(createCustomerInput: CreateCustomerInput!): GCustomer!
+  createAdmin(createAdminInput: CreateAdminInput!): AdminAuthResponse!
+  createCustomer(createCustomerInput: CreateCustomerInput!): CustomerAuthResponse!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): GEmployee!
   createProduct(createProductInput: CreateProductInput!, files: [Upload!]!): GProduct!
   deleteAdmin(id: String!): Boolean!
@@ -196,8 +204,8 @@ type Mutation {
   deleteEmployeeAvatar(id: String!): Boolean!
   deleteProductById(id: String!): Boolean!
   deleteProductImage(id: String!, image: String!): Boolean!
-  loginAdmin(loginAdminInput: LoginAdminInput!): AdminResolverResponse!
-  loginCustomer(loginCustomerInput: LoginCustomerInput!): GCustomer!
+  loginAdmin(loginAdminInput: LoginAdminInput!): AdminAuthResponse!
+  loginCustomer(loginCustomerInput: LoginCustomerInput!): CustomerAuthResponse!
   updateAdmin(id: String!, updateAdminInput: UpdateAdminInput!): AdminResolverResponse!
   updateAdminAvatar(avatar: Upload!, id: String!): Boolean!
   updateCustomer(id: String!, updateCustomerInput: UpdateCustomerInput!): GCustomer!

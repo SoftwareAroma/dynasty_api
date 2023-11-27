@@ -43,15 +43,15 @@ export class CaslAbilityFactory {
         can(Action.Update, 'all');
         can([Action.Update, Action.Delete], ['AdminModel'], { id: user.id });
     }else if(user.role == Role.USER){
-        console.log("Status Role :", user.role == Role.USER);
+        // console.log("Status Role :", user.role);
         can(Action.Read, 'all');
 
         can(Action.Create, 'CustomerModel');
         can([Action.Update, Action.Delete], ['CustomerModel'], { id: user.id });
 
-        cannot(Action.Create, 'all');
-        cannot(Action.Delete, 'all');
-        cannot(Action.Update, 'all');
+        cannot(Action.Create, ['AdminModel', 'ProductModel']);
+        cannot(Action.Delete, ['AdminModel', 'ProductModel']);
+        cannot(Action.Update, ['AdminModel', 'ProductModel']);
     } else {
       can(Action.Read, 'all');
       cannot(Action.Manage, 'all');

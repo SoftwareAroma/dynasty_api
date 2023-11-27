@@ -50,3 +50,10 @@ export class GCustomer {
     @Field({ nullable: true })
     updatedAt: Date;
 }
+
+@ObjectType()
+export class CustomerAuthResponse {
+    @Field()
+    access_token: string;
+}
+

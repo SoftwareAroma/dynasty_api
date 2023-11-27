@@ -7,7 +7,6 @@ import { UpdateAdminInput } from "@admin/dto/update.input.dto";
 import { Admin as AdminModel } from "@prisma/client";
 import { FileUpload } from "graphql-upload";
 import {JwtService} from "@nestjs/jwt";
-import Ctx from "@shared/context";
 
 @Injectable()
 export class AdminService {
@@ -21,7 +20,7 @@ export class AdminService {
    * @param createAdminInput
    * @param context
    */
-  async register(createAdminInput: CreateAdminInput, context: Ctx): Promise<{access_token:string}> {
+  async register(createAdminInput: CreateAdminInput, context: any): Promise<{access_token:string}> {
     // check if email already exists
     const emailExists = await this.prismaService.admin.findUnique({
       where: { email: createAdminInput.email },
@@ -60,7 +59,7 @@ export class AdminService {
    * @param loginAdminInput
    * @param context
    */
-  async loginAdmin(loginAdminInput: LoginAdminInput, context: Ctx): Promise<{access_token:string}> {
+  async loginAdmin(loginAdminInput: LoginAdminInput, context: any): Promise<{access_token:string}> {
     const admin = await this.findOne(
       loginAdminInput.email,
       loginAdminInput.password,

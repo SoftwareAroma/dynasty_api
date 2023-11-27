@@ -1,5 +1,5 @@
 import {Args, Context, Mutation, Query, Resolver} from '@nestjs/graphql';
-import {GCustomer} from "@customer/model/customer.model";
+import {CustomerAuthResponse, GCustomer} from "@customer/model/customer.model";
 import {CustomerService} from "@customer/customer.service";
 import Ctx from "@shared/context";
 import {CreateCustomerInput} from "@customer/dto/customer.input.dto";
@@ -27,7 +27,7 @@ export class CustomerResolver {
     constructor(private readonly customerService: CustomerService) {}
 
     /// create a customer
-    @Mutation(() => GCustomer, {name: "createCustomer"})
+    @Mutation(() => CustomerAuthResponse, {name: "createCustomer"})
     async createCustomer(
         @Args("createCustomerInput") createCustomerInput: CreateCustomerInput,
         @Context() context: Ctx ,
@@ -36,7 +36,7 @@ export class CustomerResolver {
     }
 
     /// login customer
-    @Mutation(() => GCustomer, {name: "loginCustomer"})
+    @Mutation(() => CustomerAuthResponse, {name: "loginCustomer"})
     async loginCustomer(
         @Args("loginCustomerInput") loginCustomerInput: LoginCustomerInput,
         @Context() context: Ctx,
@@ -142,8 +142,6 @@ export class CustomerResolver {
         @Context() context: Ctx,
     ): Promise<boolean> {
         context.res.cookie('access_token', undefined, { maxAge: 1 });
-        context.res.redirect('/');
-        await pubSub.publish('customerLogout', {userLogout: true});
         return true;
     }
 
