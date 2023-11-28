@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import {JWT_EXPIRES_IN, JWT_SECRET, CustomerJwtStrategy} from '@shared';
-import {CustomerController} from "./customer.controller";
-import {SecureModule} from "@shared/secure/secure.module";
+import { JWT_EXPIRES_IN, JWT_SECRET } from '@shared';
+import { CustomerController } from "./customer.controller";
+import { SecureModule } from "@shared/secure/secure.module";
 
 @Module({
   imports: [
@@ -16,13 +16,13 @@ import {SecureModule} from "@shared/secure/secure.module";
     }),
   ],
   controllers: [
-      CustomerController,
+    CustomerController,
   ],
   providers: [
-      CustomerService,
-      CustomerJwtStrategy,
+    CustomerService,
+    // CustomerJwtStrategy,
   ],
   exports: [CustomerService],
 })
-export class CustomerModule {}
+export class CustomerModule { }
 

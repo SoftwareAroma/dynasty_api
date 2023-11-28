@@ -1,12 +1,12 @@
-import {Injectable} from '@nestjs/common';
-import {Strategy} from 'passport-jwt';
-import {PassportStrategy} from '@nestjs/passport';
-import {Request} from 'express';
-import {CustomerService} from '@customer/customer.service';
-import {AdminService} from '@admin/admin.service';
-import {Admin as AdminModel, Customer as CustomerModel} from "@prisma/client";
-import {JWT_SECRET} from "@shared/common/environment";
-import {Role} from "@shared/common";
+import { Injectable } from '@nestjs/common';
+import { Strategy } from 'passport-jwt';
+import { PassportStrategy } from '@nestjs/passport';
+import { Request } from 'express';
+import { CustomerService } from '@customer/customer.service';
+import { AdminService } from '@admin/admin.service';
+import { Admin as AdminModel, Customer as CustomerModel } from "@prisma/client";
+import { JWT_SECRET } from "@shared/common/environment";
+import { Role } from "@shared/common";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         }
         else if (request.cookies['access_token'] != undefined || request.cookies['access_token'] != null) {
           return request.cookies['access_token'];
-        }else{
+        } else {
           return request.headers.cookie;
         }
 
@@ -30,10 +30,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: JWT_SECRET,
     });
   }
-  async validate(payload: any):Promise<AdminModel | CustomerModel>{
-    if(payload.role == Role.ADMIN){
+  async validate(payload: any): Promise<AdminModel | CustomerModel> {
+    // console.log(payload);
+    if (payload.role == Role.ADMIN) {
       return await this.adminService.getProfile(payload.sub);
-    }else{
+    } else {
       return await this.customerService.getProfile(payload.sub);
     }
   }

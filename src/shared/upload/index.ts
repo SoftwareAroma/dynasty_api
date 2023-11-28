@@ -1,9 +1,9 @@
 import * as cloudinary from 'cloudinary';
-import {CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_NAME} from "src/shared/common";
+import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_NAME } from "@shared/common";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import {UploadApiErrorResponse, UploadApiResponse} from "cloudinary";
+import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 import toStream = require('buffer-to-stream');
 
 
@@ -34,7 +34,7 @@ export const uploadFile = async (
         api_secret: CLOUDINARY_API_SECRET
     })
 
-    const uniqueFilename : string = new Date().toISOString()
+    const uniqueFilename: string = new Date().toISOString()
     const uploadFromBuffer = async (): Promise<
         UploadApiResponse | UploadApiErrorResponse
     > => {
@@ -82,8 +82,8 @@ export const uploadFiles = async (
 
     const uniqueFilenames: string[] = files.map(() => new Date().toISOString());
 
-    const uploadPromises : Promise<string>[] = files.map((file:any, index:number) => {
-        const public_id : string = public_ids ? public_ids[index] : undefined;
+    const uploadPromises: Promise<string>[] = files.map((file: any, index: number) => {
+        const public_id: string = public_ids ? public_ids[index] : undefined;
         return new Promise<string>(async (resolve, reject): Promise<void> => {
             file.createReadStream().pipe(
                 cloudinary.v2.uploader.upload_stream(
@@ -92,7 +92,7 @@ export const uploadFiles = async (
                         public_id: public_id ?? uniqueFilenames[index],
                         tags: tag ?? 'dynasty'
                     },
-                    (err: cloudinary.UploadApiErrorResponse, image : cloudinary.UploadApiResponse) : void => {
+                    (err: cloudinary.UploadApiErrorResponse, image: cloudinary.UploadApiResponse): void => {
                         if (err) {
                             reject(err);
                         } else {
@@ -101,7 +101,7 @@ export const uploadFiles = async (
                     }
                 )
             )
-                .on('error', (error: any) : void => {
+                .on('error', (error: any): void => {
                     reject(error);
                 });
         });
@@ -122,7 +122,7 @@ export const uploadFiles = async (
  * Delete file from cloudinary
  * @param public_id
  */
-export const deleteFile = async (public_id: string) : Promise<boolean> =>  {
+export const deleteFile = async (public_id: string): Promise<boolean> => {
     cloudinary.v2.config({
         cloud_name: CLOUDINARY_NAME,
         api_key: CLOUDINARY_API_KEY,
@@ -140,11 +140,11 @@ export const deleteFile = async (public_id: string) : Promise<boolean> =>  {
  * it takes the destination path in a string format
  * @param destination
  */
-export const storage = (destination:string) => multer.diskStorage({
+export const storage = (destination: string) => multer.diskStorage({
     destination: function (req, file, cb) {
         const folderPath = path.join(`${process.cwd()}/`, `${destination}`);
-        if(!fs.existsSync(folderPath)){
-            fs.mkdirSync(folderPath, {recursive: true});
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
         }
         cb(null, `${destination}`)
     },
