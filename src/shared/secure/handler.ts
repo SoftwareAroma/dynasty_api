@@ -1,14 +1,14 @@
-import {Action, AppAbility, IPolicyHandler} from "@shared";
+import { Action, AppAbility, IPolicyHandler } from "@shared";
 
 
 /**
  * customer
  */
-// export class CreateCustomerPolicyHandler implements IPolicyHandler {
-//   handle(ability: AppAbility) {
-//     return ability.can(Action.Create, 'CustomerModel');
-//   }
-// }
+export class CreateCustomerPolicyHandler implements IPolicyHandler {
+    handle(ability: AppAbility) {
+        return ability.can(Action.Create, 'CustomerModel');
+    }
+}
 
 
 export class ReadCustomerPolicyHandler implements IPolicyHandler {
@@ -37,17 +37,17 @@ export class CreateEmployeePolicyHandler implements IPolicyHandler {
         return ability.can(Action.Create, 'EmployeeModel');
     }
 }
-// export class ReadEmployeePolicyHandler implements IPolicyHandler {
-//     handle(ability: AppAbility) {
-//         return ability.can(Action.Read, 'EmployeeModel');
-//     }
-// }
-//
-// export class UpdateEmployeePolicyHandler implements IPolicyHandler {
-//     handle(ability: AppAbility) {
-//         return ability.can(Action.Update, 'EmployeeModel');
-//     }
-// }
+export class ReadEmployeePolicyHandler implements IPolicyHandler {
+    handle(ability: AppAbility) {
+        return ability.can(Action.Read, 'EmployeeModel');
+    }
+}
+
+export class UpdateEmployeePolicyHandler implements IPolicyHandler {
+    handle(ability: AppAbility) {
+        return ability.can(Action.Update, 'EmployeeModel');
+    }
+}
 
 export class DeleteEmployeePolicyHandler implements IPolicyHandler {
     handle(ability: AppAbility) {
@@ -58,11 +58,11 @@ export class DeleteEmployeePolicyHandler implements IPolicyHandler {
 /**
  * attendance
  */
-// export class ReadAttendancePolicyHandler implements IPolicyHandler {
-//     handle(ability: AppAbility) {
-//         return ability.can(Action.Read, 'AttendanceModel');
-//     }
-// }
+export class ReadAttendancePolicyHandler implements IPolicyHandler {
+    handle(ability: AppAbility) {
+        return ability.can(Action.Read, 'AttendanceModel');
+    }
+}
 
 
 /**
@@ -73,11 +73,11 @@ export class CreateProductPolicyHandler implements IPolicyHandler {
         return ability.can(Action.Create, 'ProductModel');
     }
 }
-// export class ReadProductPolicyHandler implements IPolicyHandler {
-//     handle(ability: AppAbility) {
-//         return ability.can(Action.Read, 'ProductModel');
-//     }
-// }
+export class ReadProductPolicyHandler implements IPolicyHandler {
+    handle(ability: AppAbility) {
+        return ability.can(Action.Read, 'ProductModel');
+    }
+}
 
 export class UpdateProductPolicyHandler implements IPolicyHandler {
     handle(ability: AppAbility) {

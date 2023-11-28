@@ -1,7 +1,7 @@
 import { AbilityBuilder, PureAbility } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
 import { createPrismaAbility, PrismaQuery, Subjects } from '@casl/prisma';
-import {Role,Action} from "@shared";
+import { Role, Action } from "@shared";
 
 import {
     Admin as AdminModel,
@@ -18,14 +18,14 @@ export type AppAbility = PureAbility<
         (
             | 'all'
             | Subjects<{
-            CustomerModel: CustomerModel;
-            AdminModel: AdminModel;
-            ProductModel: ProductModel;
-            CartModel: CartModel;
-            AttendanceModel: AttendanceModel;
-            EmployeeModel: EmployeeModel;
-        }>
-            ),
+                CustomerModel: CustomerModel;
+                AdminModel: AdminModel;
+                ProductModel: ProductModel;
+                CartModel: CartModel;
+                AttendanceModel: AttendanceModel;
+                EmployeeModel: EmployeeModel;
+            }>
+        ),
     ],
     PrismaQuery
 >;
@@ -39,15 +39,19 @@ export class SecuredFactory {
 
         if (user.role == Role.ADMIN) {
             can(Action.Manage, 'all');
-        } else {
+            can([Action.Update, Action.Delete], ['AdminModel'], { id: user.id });
+        } else if (user.role == Role.USER) {
+            // console.log("Status Role :", user.role);
             can(Action.Read, 'all');
 
+            can(Action.Create, 'CustomerModel');
+            can([Action.Update, Action.Delete], ['CustomerModel'], { id: user.id });
+
+            cannot([Action.Create, Action.Update, Action.Delete], ['AdminModel', 'ProductModel']);
+        } else {
+            can(Action.Read, 'all');
             cannot(Action.Manage, 'all');
-            cannot(Action.Create, 'all');
-            cannot(Action.Delete, 'all');
-            cannot(Action.Update, 'all');
         }
-        can([Action.Update, Action.Delete], ['AdminModel'], { id: user.id });
 
         return build();
     }

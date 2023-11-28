@@ -73,10 +73,8 @@ export class AdminService {
     );
     const payload = { username: admin.email, sub: admin.id, role: admin.role };
     const token = await this.jwtService.signAsync(payload);
-    response.cookie('access_token', token, {
-      domain: DOMAINS,
-      httpOnly: true,
-    });
+    // console.log(token)
+    response.cookie('access_token', token, { httpOnly: true, });
     return this.exclude(admin, ['password', 'salt']);
   }
 
@@ -94,6 +92,11 @@ export class AdminService {
    * @param id
    */
   async getProfile(id: string): Promise<AdminModel> {
+    console.log("user profile id >>> ", id)
+    // if id is null then throw an error
+    if (id == null || id == undefined) {
+      throw new HttpException('Please provide a valid user id', HttpStatus.BAD_REQUEST);
+    }
     const _admin = await this.prismaService.admin.findUnique({ where: { id: id } });
     if (!_admin) {
       throw new HttpException('No Record found for the this id', HttpStatus.NOT_FOUND);
