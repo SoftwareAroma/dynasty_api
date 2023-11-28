@@ -1,6 +1,6 @@
-import {IsArray, IsInt, isInt, IsNotEmpty, IsNumber, IsOptional, IsString} from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { PriceType } from '@common';
+import { PriceType } from '@shared';
 
 export class CreateProductDto {
   @IsString()

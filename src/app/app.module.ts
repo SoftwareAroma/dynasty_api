@@ -2,17 +2,17 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import configuration, {AllExceptionFilter, JwtStrategy} from '@common';
+import { configuration, JwtStrategy } from '@shared';
 import { AdminModule } from '@admin/admin.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomerModule } from '@customer/customer.module';
 import { ProductModule } from '@product/product.module';
-import { PrismaModule } from '@prisma/prisma.module';
-import { CloudinaryModule } from '@cloudinary/cloudinary.module';
+import { PrismaModule } from '@shared/prisma/prisma.module';
+import { CloudinaryModule } from '@shared/cloudinary/cloudinary.module';
 import * as Joi from 'joi';
 import { EmployeeModule } from '@employee/employee.module';
-import { PaymentModule } from '@payment/payment.module';
 import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter, PrismaClientExceptionFilter } from '@shared';
 
 @Module({
   imports: [
@@ -21,7 +21,6 @@ import { APP_FILTER } from '@nestjs/core';
     CustomerModule,
     ProductModule,
     EmployeeModule,
-    PaymentModule,
 
     // prisma for database query and connection
     PrismaModule,
@@ -58,7 +57,11 @@ import { APP_FILTER } from '@nestjs/core';
     JwtStrategy,
     {
       provide: APP_FILTER,
-      useClass: AllExceptionFilter,
+      useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: PrismaClientExceptionFilter,
     },
   ],
 })

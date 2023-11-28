@@ -17,9 +17,8 @@ import { ConfigService } from '@nestjs/config';
 import { CreateAdminDto } from '@admin/dto/create.dto';
 import { Response } from 'express';
 import { LoginAdminDto } from '@admin/dto/login.dto';
-import { CheckPolicies, JwtAuthGuard } from '@common';
+import { CheckPolicies, JwtAuthGuard, PoliciesGuard } from '@shared';
 import { UpdateAdminDto } from '@admin/dto/update.dto';
-import { PoliciesGuard } from '@common/guards/policies.guard';
 import {
   DeleteAdminPolicyHandler,
   ReadAdminPolicyHandler,
@@ -33,22 +32,14 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   @Post('register')
   async createAdmin(
     @Body() createAdminDto: CreateAdminDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ access_token: string }> {
-    const domain = this.configService.get<string>('DOMAIN');
-    const token = await this.adminService.register(createAdminDto);
-    if (token == undefined) {
-      return null;
-    }
-    response.cookie('access_token', token, {
-      domain: domain,
-      httpOnly: true,
-    });
+    const token = await this.adminService.register(createAdminDto, response);
     return { access_token: token };
   }
 
@@ -57,38 +48,29 @@ export class AdminController {
     @Body() loginAdminDto: LoginAdminDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ access_token: string }> {
-    const token = await this.adminService.loginAdmin(loginAdminDto);
-    const domain = this.configService.get<string>('DOMAIN');
-    if (token == undefined) {
-      return null;
-    }
-    response.cookie('access_token', token, {
-      domain: domain,
-      httpOnly: true,
-    });
+    const token = await this.adminService.loginAdmin(loginAdminDto, response);
     return { access_token: token };
   }
 
-  @UseGuards(PoliciesGuard)
   @CheckPolicies(new ReadAdminPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Get('admins')
   async getAllAdmins(): Promise<AdminModel[]> {
     return await this.adminService.getAdmins();
   }
 
-  @UseGuards(PoliciesGuard)
+
   @CheckPolicies(new ReadAdminPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Get('profile')
   async getProfile(@Req() request): Promise<AdminModel | any> {
     const { userId } = request.user;
     return this.adminService.getProfile(userId);
   }
 
-  @UseGuards(PoliciesGuard)
+
   @CheckPolicies(new UpdateAdminPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   @Patch('avatar/:id')
   async updateCustomerAvatar(
@@ -99,9 +81,9 @@ export class AdminController {
     return { isSaved: saved };
   }
 
-  @UseGuards(PoliciesGuard)
+
   @CheckPolicies(new UpdateAdminPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Post('delete-avatar/:id')
   async deleteCustomerAvatar(
     @Param('id') id: string,
@@ -110,9 +92,9 @@ export class AdminController {
     return { isSaved: saved };
   }
 
-  @UseGuards(PoliciesGuard)
+
   @CheckPolicies(new UpdateAdminPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Patch('update/:id')
   async updateClientProfile(
     @Param('id') id: string,
@@ -122,14 +104,13 @@ export class AdminController {
   }
 
   @Get('logout')
-  async logoutClient(@Res({ passthrough: true }) response): Promise<null> {
+  async logoutClient(@Res({ passthrough: true }) response): Promise<boolean> {
     response.cookie('access_token', '', { maxAge: 1 });
-    response.redirect('/');
-    return null;
+    return true;
   }
 
-  @UseGuards(PoliciesGuard)
   @CheckPolicies(new DeleteAdminPolicyHandler())
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Delete('delete/:id')
   async deleteAdminData(
     @Param('id') id: string,

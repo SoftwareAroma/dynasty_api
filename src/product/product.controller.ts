@@ -10,13 +10,12 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {ProductService} from '@product/product.service';
-import {Product} from '@prisma/client';
-import {CreateProductDto} from '@product/dto/create.dto';
-import {CheckPolicies, JwtAuthGuard} from '@common';
-import {FilesInterceptor} from '@nestjs/platform-express';
-import {UpdateProductDto} from '@product/dto/update.dto';
-import {PoliciesGuard} from '@common/guards/policies.guard';
+import { ProductService } from '@product/product.service';
+import { Product } from '@prisma/client';
+import { CreateProductDto } from '@product/dto/create.dto';
+import { CheckPolicies, JwtAuthGuard, PoliciesGuard } from '@shared';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { UpdateProductDto } from '@product/dto/update.dto';
 import {
   CreateProductPolicyHandler,
   DeleteProductPolicyHandler,
@@ -25,7 +24,7 @@ import {
 
 @Controller({ path: 'product', version: '1' })
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
   /// create a new product
   @UseGuards(PoliciesGuard)
@@ -80,12 +79,12 @@ export class ProductController {
     @Param('id') id: string,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<Product> {
-      const _productDto = updateProductDto;
-      // convert price string to json object
-      _productDto.price = JSON.parse(_productDto.price.toString());
-      _productDto.numInStock = parseInt(_productDto.numInStock ? _productDto.numInStock.toString() : "0", 10);
-      _productDto.numReviews = parseInt(_productDto.numReviews != null ? _productDto.numReviews.toString() : "0", 10);
-      _productDto.rating = parseInt(_productDto.rating != null ? _productDto.rating?.toString() : "0", 10);
+    const _productDto = updateProductDto;
+    // convert price string to json object
+    _productDto.price = JSON.parse(_productDto.price.toString());
+    _productDto.numInStock = parseInt(_productDto.numInStock ? _productDto.numInStock.toString() : "0", 10);
+    _productDto.numReviews = parseInt(_productDto.numReviews != null ? _productDto.numReviews.toString() : "0", 10);
+    _productDto.rating = parseInt(_productDto.rating != null ? _productDto.rating?.toString() : "0", 10);
     return await this.productService.updateProduct(id, _productDto, files);
   }
 

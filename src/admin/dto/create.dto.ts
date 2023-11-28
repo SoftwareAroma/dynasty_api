@@ -6,7 +6,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { Role } from '@common';
+import { Role } from '@shared';
 
 export class CreateAdminDto {
   @IsString()
@@ -28,7 +28,7 @@ export class CreateAdminDto {
   @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
-  displayName: string;
+  userName: string;
 
   @IsString()
   @IsOptional()

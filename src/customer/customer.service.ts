@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Customer as CustomerModel } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
-import { comparePassword, generateSalt, hashPassword } from '@common';
+import { comparePassword, generateSalt, hashPassword, getDefaultPropertyValue } from '@shared';
 import { CreateCustomerDto } from '@customer/dto/create.dto';
 import { UpdateCustomerDto } from '@customer/dto/update.dto';
 import { LoginCustomerDto } from '@customer/dto/login.dto';
-import { PrismaService } from '@prisma/prisma.service';
-import { CloudinaryService } from '@cloudinary/cloudinary.service';
+import { PrismaService } from '@shared/prisma/prisma.service';
+import { CloudinaryService } from '@shared/cloudinary/cloudinary.service';
+import { Response } from 'express';
 
 @Injectable()
 export class CustomerService {
@@ -17,44 +18,41 @@ export class CustomerService {
   ) { }
 
   /// create a customer
-  async register(createCustomerDto: CreateCustomerDto): Promise<string> {
-    const response = await this.createCustomer(createCustomerDto);
-    if (response.id) {
-      // generate a token
-      const payload = { sub: response.id, username: response.email };
-      return this.jwtService.sign(payload);
-    }
-    return response;
+  async register(createCustomerDto: CreateCustomerDto, response: Response): Promise<string> {
+    const _response = await this.createCustomer(createCustomerDto);
+    const payload = { sub: _response.id, username: _response.email };
+    // generate a token
+    const token = this.jwtService.sign(payload);
+    response.cookie('access_token', token, {
+      httpOnly: true,
+    });
+    return token;
   }
 
   // log in customer
-  async loginCustomer(loginCustomerDto: LoginCustomerDto): Promise<string> {
+  async loginCustomer(loginCustomerDto: LoginCustomerDto, response: Response): Promise<string> {
     const customer = await this.validateCustomer(loginCustomerDto);
     const payload = { username: customer.email, sub: customer.id };
-    return this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload);
+    response.cookie('access_token', token, {
+      httpOnly: true,
+    });
+    return token;
   }
 
   // validate customer
   async validateCustomer(
     loginCustomerDto: LoginCustomerDto,
   ): Promise<CustomerModel> {
-    const customer = await this.findOne(
+    return await this.findOne(
       loginCustomerDto.email,
       loginCustomerDto.password,
     );
-    if (customer === undefined) {
-      return undefined;
-    }
-    return customer;
   }
 
   // get user profile
   async getProfile(id: string): Promise<CustomerModel> {
-    const customer = await this.getCustomerProfile(id);
-    if (customer === undefined) {
-      return undefined;
-    }
-    return customer;
+    return await this.getCustomerProfile(id);
   }
 
   // get all customers
@@ -77,13 +75,56 @@ export class CustomerService {
     return this.updateCustomerProfile(id, updateCustomerDto);
   }
 
+  // reset password
+  async resetCustomerPassword(id: string, newPassword: string): Promise<boolean> {
+    const _user = await this.prismaService.customer.findUnique({
+      where: {
+        id: id
+      }
+    })
+    if (!_user) {
+      throw new HttpException("No record found for user", HttpStatus.NOT_FOUND);
+    }
+
+    // generate salt
+    const salt = await generateSalt();
+    const hashNewPassword = await hashPassword(newPassword, salt)
+
+    // update user password 
+    const _updated = await this.prismaService.customer.update({
+      where: {
+        id: id
+      },
+      data: {
+        salt: salt,
+        password: hashNewPassword,
+      }
+    })
+
+    return !!_updated;
+  }
+
   /// update the avatar of customer
   async updateAvatar(id: string, file: Express.Multer.File): Promise<boolean> {
+    // check if user exist
+    const _exists = await this.prismaService.customer.findUnique({
+      where: {
+        id: id,
+      }
+    })
+
+    if (!_exists) {
+      throw new HttpException('No Record found for user', HttpStatus.NOT_FOUND);
+    }
+
     const _uploadFile = await this.cloudinaryService.uploadFile(
       file,
-      'dynasty/customer/avatar',
-      `${file.originalname?.split('.')[0]}`,
+      `${file.filename?.split('.')[0]}`,
+      'dynasty/admin/avatar',
+      'dynasty_customer_avatar'
     );
+
+
     const _customer = await this.prismaService.customer.update({
       where: {
         id: id,
@@ -97,17 +138,25 @@ export class CustomerService {
 
   /// delete the customer avatar
   async deleteAvatar(id: string): Promise<boolean> {
-    const _customer = await this.prismaService.customer.findUnique({
+    const _customer: CustomerModel = await this.prismaService.customer.findUnique({
       where: { id: id },
     });
-    if (_customer != null) {
-      _customer.avatar =
-        'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+
+    if (!_customer) {
+      throw new HttpException('No Record found for user', HttpStatus.NOT_FOUND);
     }
+    const url: URL = new URL(_customer.avatar);
+    const pathnameParts: string[] = url.pathname.split('/');
+    const publicId: string = pathnameParts[pathnameParts.length - 1].replace(/\.[^/.]+$/, "");
+
+    // console.log(publicId);
+    await this.cloudinaryService.deleteFile(publicId);
+
     const saved = await this.prismaService.customer.update({
       where: { id: id },
       data: {
-        avatar: _customer.avatar,
+        avatar:
+          'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
       },
     });
     return !!saved;
@@ -131,37 +180,41 @@ export class CustomerService {
   private async findOne(
     email: string,
     password: string,
-  ): Promise<CustomerModel | any> {
+  ): Promise<CustomerModel> {
+    if (email == null || password == null) {
+      throw new HttpException('Please provide a valid email and password', HttpStatus.BAD_REQUEST);
+    }
     const customer = await this.prismaService.customer.findUnique({
       where: { email: email },
     });
     if (!customer) {
-      return undefined;
+      throw new HttpException(`No Records found for user with email ${email}`, HttpStatus.NOT_FOUND);
     }
     // compare passwords
     const isPasswordValid = await comparePassword(password, customer.password);
     if (!isPasswordValid) {
-      return null;
+      throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
     }
     return this.exclude(customer, ['password', 'salt']);
   }
 
   // create a new customer
   private async createCustomer(
-    createCustomerDto: any,
-  ): Promise<CustomerModel | any> {
+    createCustomerDto: CreateCustomerDto,
+  ): Promise<CustomerModel> {
     // check if email already exists
     const emailExists = await this.prismaService.customer.findUnique({
       where: { email: createCustomerDto.email },
     });
     if (emailExists) {
-      return {
-        status: 'error',
-        message: 'Email already exists',
-      };
+      // throw an error if email already exists
+      throw new HttpException('Email Already Exist', HttpStatus.CONFLICT);
     }
-    if (createCustomerDto.displayName == null) {
-      createCustomerDto.displayName = `${createCustomerDto.firstName} ${createCustomerDto.lastName}`;
+    if (createCustomerDto.userName == null) {
+      createCustomerDto.userName = `${createCustomerDto.firstName} ${createCustomerDto.lastName}`;
+    }
+    if (createCustomerDto.password != null && createCustomerDto.password?.length < 8) {
+      throw new HttpException('Password must be at least 8 characters', HttpStatus.BAD_REQUEST);
     }
     // generate salt
     const salt = await generateSalt();
@@ -184,7 +237,7 @@ export class CustomerService {
   async validateSocialUser(
     socialId: string,
     user: any,
-  ): Promise<CustomerModel | any> {
+  ): Promise<CustomerModel> {
     // check if user already exists in our db, if not create a new user
     const _customer = await this.prismaService.customer.findFirst({
       where: { social: socialId },
@@ -202,7 +255,11 @@ export class CustomerService {
   private async updateCustomerProfile(
     id: string,
     updateCustomerDto: UpdateCustomerDto,
-  ): Promise<CustomerModel | any> {
+  ): Promise<CustomerModel> {
+    if (id == null) {
+      // throw an error if email already exists
+      throw new HttpException('Please provide a valid user id', HttpStatus.BAD_REQUEST);
+    }
     // first find the admin
     await this.prismaService.customer.update({
       where: { id: id },
@@ -212,24 +269,32 @@ export class CustomerService {
   }
 
   // get the profile of a  customer (user)
-  private async getCustomerProfile(id: string): Promise<CustomerModel | any> {
+  private async getCustomerProfile(id: string): Promise<CustomerModel> {
     const customer = await this.prismaService.customer.findUnique({
       where: { id: id },
     });
     if (!customer) {
-      return undefined;
+      // throw an error if email already exists
+      throw new HttpException('No records found for this user', HttpStatus.NOT_FOUND);
     }
     return this.exclude(customer, ['password', 'salt']);
   }
 
-  // Exclude keys from user
+  /**
+   * Exclude properties from a user object
+   * @param user
+   * @param keys
+   * @private
+   */
   private exclude<CustomerModel, Key extends keyof CustomerModel>(
     user: CustomerModel,
     keys: Key[],
-  ): Omit<CustomerModel, Key> {
+  ): CustomerModel {
     for (const key of keys) {
-      delete user[key];
+      // Populate the value with a default value of its type
+      user[key] = getDefaultPropertyValue(user[key]);
     }
     return user;
   }
+
 }

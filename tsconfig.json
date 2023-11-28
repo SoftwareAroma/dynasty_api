@@ -19,28 +19,31 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      // app path
       "@app/*": ["src/app/*"],
       "@app": ["src/app"],
-      "@common": ["src/common"],
-      "@common/*": ["src/common/*"],
+
+      /// module path
       "@admin/*": ["src/admin/*"],
       "@admin": ["src/admin"],
       "@customer": ["src/customer"],
       "@customer/*": ["src/customer/*"],
       "@product/*": ["src/product/*"],
       "@product": ["src/product"],
-      "@casl": ["src/casl"],
-      "@casl/*": ["src/casl/*"],
-      "@prisma/*": ["src/prisma/*"],
-      "@prisma": ["src/prisma"],
-      "@filter": ["src/exception"],
-      "@filter/*": ["src/exception/*"],
-      "@cloudinary": ["src/cloudinary"],
-      "@cloudinary/*": ["src/cloudinary/*"],
-      "@payment": ["src/payment"],
-      "@payment/*": ["src/payment/*"],
       "@employee": ["src/employee"],
       "@employee/*": ["src/employee/*"],
+
+      // shared module paths
+      "@prisma/*": ["src/shared/prisma/*"],
+      "@prisma": ["src/shared/prisma"],
+      "@cloudinary": ["src/shared/cloudinary"],
+      "@cloudinary/*": ["src/shared/cloudinary/*"],
+      "@casl": ["src/shared/casl"],
+      "@casl/*": ["src/shared/casl/*"],
+
+      /// shared paths
+      "@shared": ["src/shared"],
+      "@shared/*": ["src/shared/*"],
     }
   }
 }

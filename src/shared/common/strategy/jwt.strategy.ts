@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
-import { jwtConstants } from '@common';
+import { jwtConstants } from '@shared';
 import { CustomerService } from '@customer/customer.service';
 import { AdminService } from '@admin/admin.service';
 
@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         else if (request.cookies['access_token'] != undefined || request.cookies['access_token'] != null) {
           // console.log("Request Cookie ", request.cookies['access_token']);
           return request.cookies['access_token'];
-        }else{
+        } else {
           // console.log("Request Cookie Header ", request.headers.cookie);
           return request.headers.cookie;
         }

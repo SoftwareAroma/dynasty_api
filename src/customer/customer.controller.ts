@@ -15,13 +15,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { CustomerService } from '@customer/customer.service';
 import { Response } from 'express';
-import { CheckPolicies, JwtAuthGuard } from '@common';
+import { CheckPolicies, JwtAuthGuard, PoliciesGuard } from '@shared';
 import { UpdateCustomerDto } from '@customer/dto/update.dto';
 import { Customer } from '@prisma/client';
 import { LoginCustomerDto } from '@customer/dto/login.dto';
 import { CreateCustomerDto } from '@customer/dto/create.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PoliciesGuard } from '@common/guards/policies.guard';
 import {
   DeleteCustomerPolicyHandler,
   ReadCustomerPolicyHandler,
@@ -33,19 +32,14 @@ export class CustomerController {
   constructor(
     private readonly configService: ConfigService,
     private readonly customerService: CustomerService,
-  ) {}
+  ) { }
 
   @Post('register')
   async createAdmin(
     @Body() createCustomerDto: CreateCustomerDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ access_token: string }> {
-    const domain = this.configService.get<string>('DOMAIN');
-    const token = await this.customerService.register(createCustomerDto);
-    response.cookie('access_token', token, {
-      domain: domain,
-      httpOnly: true,
-    });
+    const token = await this.customerService.register(createCustomerDto, response);
     return { access_token: token };
   }
 
@@ -54,35 +48,28 @@ export class CustomerController {
     @Body() loginCustomerDto: LoginCustomerDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ access_token: string }> {
-    const token = await this.customerService.loginCustomer(loginCustomerDto);
-    const domain = this.configService.get<string>('DOMAIN');
-    response.cookie('access_token', token, {
-      domain: domain,
-      httpOnly: true,
-    });
+    const token = await this.customerService.loginCustomer(loginCustomerDto, response);
     return { access_token: token };
   }
 
-  @Get('customers')
-  @UseGuards(PoliciesGuard)
   @CheckPolicies(new ReadCustomerPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @Get('customers')
   async getAllCustomers(): Promise<Customer[]> {
     return await this.customerService.getCustomers();
   }
 
-  @UseGuards(PoliciesGuard)
+
   @CheckPolicies(new ReadCustomerPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Get('profile')
   async getProfile(@Req() request): Promise<Customer> {
     const { userId } = request.user;
     return this.customerService.getProfile(userId);
   }
 
-  @UseGuards(PoliciesGuard)
   @CheckPolicies(new UpdateCustomerPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Patch('avatar/:id')
   @UseInterceptors(FileInterceptor('avatar'))
   async updateCustomerAvatar(
@@ -93,9 +80,9 @@ export class CustomerController {
     return { isSaved: saved };
   }
 
-  @UseGuards(PoliciesGuard)
+
   @CheckPolicies(new UpdateCustomerPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Post('delete-avatar/:id')
   async deleteCustomerAvatar(
     @Param('id') id: string,
@@ -104,9 +91,9 @@ export class CustomerController {
     return { isSaved: saved };
   }
 
-  @UseGuards(PoliciesGuard)
+
   @CheckPolicies(new UpdateCustomerPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @Patch('update/:id')
   async updateCustomerProfile(
     @Param('id') id: string,
@@ -116,13 +103,12 @@ export class CustomerController {
   }
 
   @Get('logout')
-  async logoutCustomer(@Res({ passthrough: true }) response): Promise<null> {
+  async logoutCustomer(@Res({ passthrough: true }) response): Promise<boolean> {
     response.cookie('access_token', '', { maxAge: 1 });
-    response.redirect('/');
-    return null;
+    return true;
   }
 
-  @UseGuards(PoliciesGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @CheckPolicies(new DeleteCustomerPolicyHandler())
   @Delete('delete/:id')
   async deleteCustomerData(

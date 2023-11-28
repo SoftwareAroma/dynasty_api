@@ -3,7 +3,7 @@ import { CustomerController } from './customer.controller';
 import { CustomerService } from './customer.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from '@common';
+import { jwtConstants } from '@shared';
 import { CaslModule } from '@casl/casl.module';
 
 @Module({
@@ -17,9 +17,9 @@ import { CaslModule } from '@casl/casl.module';
   ],
   controllers: [CustomerController],
   providers: [
-      CustomerService,
-      // CustomerJwtStrategy,
+    CustomerService,
+    // CustomerJwtStrategy,
   ],
   exports: [CustomerService],
 })
-export class CustomerModule {}
+export class CustomerModule { }

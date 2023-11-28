@@ -1,6 +1,6 @@
 import { AppAbility } from '@casl/casl-ability.factory/casl-ability.factory';
 import { IPolicyHandler } from '@casl/interface/policy.interface';
-import { Actions } from '@common';
+import { Actions } from '@shared';
 
 /// Customer
 export class ReadCustomerPolicyHandler implements IPolicyHandler {

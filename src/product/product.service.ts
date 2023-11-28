@@ -1,9 +1,9 @@
-import {Injectable} from '@nestjs/common';
-import {Product as ProductModel} from '@prisma/client';
-import {PrismaService} from '@prisma/prisma.service';
-import {CreateProductDto} from '@product/dto/create.dto';
-import {CloudinaryService} from '@cloudinary/cloudinary.service';
-import {UpdateProductDto} from '@product/dto/update.dto';
+import { Injectable } from '@nestjs/common';
+import { Product as ProductModel } from '@prisma/client';
+import { PrismaService } from '@shared/prisma/prisma.service';
+import { CreateProductDto } from '@product/dto/create.dto';
+import { CloudinaryService } from '@shared/cloudinary/cloudinary.service';
+import { UpdateProductDto } from '@product/dto/update.dto';
 
 @Injectable()
 export class ProductService {
@@ -17,14 +17,14 @@ export class ProductService {
     createProductDto: CreateProductDto,
     files: Array<Express.Multer.File>,
   ): Promise<ProductModel | any> {
-    if(files.length > 0){
+    if (files.length > 0) {
       const _images = [];
       for (const image of files) {
         // console.log("data ", files);
         const _fileUrl = await this.cloudinaryService.uploadFile(
-            image,
-            'dynasty/products',
-            `${image.originalname?.split('.')[0]}`,
+          image,
+          'dynasty/products',
+          `${image.originalname?.split('.')[0]}`,
         );
         _images.push(_fileUrl);
       }
@@ -71,7 +71,7 @@ export class ProductService {
     updateProductDto: UpdateProductDto,
     files: Array<Express.Multer.File>,
   ): Promise<ProductModel> {
-    if(files.length > 0){
+    if (files.length > 0) {
       const _images = [];
       for (const image of files) {
         const _fileUrl = await this.cloudinaryService.uploadFile(
@@ -85,7 +85,7 @@ export class ProductService {
     }
 
     return this.prismaService.product.update({
-      where: {id: id},
+      where: { id: id },
       data: updateProductDto,
     });
   }

@@ -1,7 +1,6 @@
 import { AbilityBuilder, PureAbility } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
-import { Actions } from '@common/enums/actions.enum';
-import { Role } from '@common';
+import { Role, Actions } from '@shared';
 import {
   Admin as AdminModel,
   Customer as CustomerModel,
@@ -16,11 +15,11 @@ export type AppAbility = PureAbility<
     (
       | 'all'
       | Subjects<{
-          CustomerModel: CustomerModel;
-          AdminModel: AdminModel;
-          ProductModel: ProductModel;
-          EmployeeModel: EmployeeModel;
-        }>
+        CustomerModel: CustomerModel;
+        AdminModel: AdminModel;
+        ProductModel: ProductModel;
+        EmployeeModel: EmployeeModel;
+      }>
     ),
   ],
   PrismaQuery

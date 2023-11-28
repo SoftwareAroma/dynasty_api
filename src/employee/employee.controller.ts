@@ -18,8 +18,7 @@ import {
 } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateEmployeeDto } from './dto/update.dto';
-import { PoliciesGuard } from '@common/guards/policies.guard';
-import { CheckPolicies, JwtAuthGuard } from '@common';
+import { CheckPolicies, JwtAuthGuard, PoliciesGuard } from '@shared';
 import {
   CreateEmployeePolicyHandler,
   DeleteEmployeePolicyHandler,
@@ -27,7 +26,7 @@ import {
 
 @Controller({ path: 'employee', version: '1' })
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(private readonly employeeService: EmployeeService) { }
 
   // @UseGuards(PoliciesGuard)
   // @CheckPolicies(new CreateEmployeePolicyHandler())

@@ -1,14 +1,12 @@
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import {DocumentBuilder, OpenAPIObject, SwaggerModule} from '@nestjs/swagger';
-import { PrismaService } from '@prisma/prisma.service';
-import { PrismaClientExceptionFilter } from '@filter/exception.filter';
-import { AllExceptionFilter } from '@common';
+import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { PrismaService } from '@shared/prisma/prisma.service';
 
 /*
  * ######################################################
@@ -16,7 +14,7 @@ import { AllExceptionFilter } from '@common';
  * ######################################################
  * */
 const bootstrap = async (): Promise<void> => {
-  const app:NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
+  const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // 'log' // remove log to disable logging
   });
   // app config service
@@ -26,10 +24,10 @@ const bootstrap = async (): Promise<void> => {
   // string from environment file
   const origin: string = configService.get<string>('FRONTEND_URL');
   // api version
-  const apiVersion :string = configService.get<string>('API_VERSION');
-  const swaggerPath: string = 'swagger';
+  const apiVersion: string = configService.get<string>('API_VERSION');
+  const swaggerPath = 'swagger';
   // global prefix
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
   // enable CORS
   app.enableCors({
     origin: origin,
@@ -79,11 +77,6 @@ const bootstrap = async (): Promise<void> => {
   const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
   // path for swagger
   SwaggerModule.setup(`${swaggerPath}`, app, document);
-
-  // exception handling
-  const { httpAdapter } = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
-  app.useGlobalFilters(new AllExceptionFilter(app.get(HttpAdapterHost)));
 
   // get the port from the config file
   const port = configService.get<number>('PORT');

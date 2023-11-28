@@ -3,7 +3,7 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from '@common';
+import { jwtConstants } from '@shared';
 import { CaslModule } from '@casl/casl.module';
 
 @Module({
@@ -17,9 +17,9 @@ import { CaslModule } from '@casl/casl.module';
   ],
   controllers: [AdminController],
   providers: [
-      AdminService,
-      // AdminJwtStrategy,
+    AdminService,
+    // AdminJwtStrategy,
   ],
   exports: [AdminService],
 })
-export class AdminModule {}
+export class AdminModule { }

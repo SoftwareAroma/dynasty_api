@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '@shared';
 
 export class CreateCustomerDto {
   @IsString()
@@ -16,6 +17,7 @@ export class CreateCustomerDto {
   @IsString()
   @IsOptional()
   @IsNotEmpty()
+  @MinLength(8)
   @ApiProperty()
   password: string;
 
@@ -33,7 +35,7 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
-  displayName: string;
+  userName: string;
 
   @IsString()
   @IsOptional()
@@ -53,9 +55,8 @@ export class CreateCustomerDto {
   @ApiProperty()
   avatar: string;
 
-  @IsString()
   @IsOptional()
   @IsNotEmpty()
   @ApiProperty()
-  roles: string[];
+  role: Role;
 }
