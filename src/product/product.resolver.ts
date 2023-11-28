@@ -38,7 +38,7 @@ export class ProductResolver {
         @Args('createProductInput') createProductInput: CreateProductInput,
         @Args('files', { type: () => [GraphQLUpload] }) files: Array<Promise<FileUpload>>,
     ): Promise<ProductModel> {
-        const resolvedFiles: FileUpload[] = await Promise.all(files); // Wait for all promises to resolve
+        const resolvedFiles: Array<FileUpload> = await Promise.all(files); // Wait for all promises to resolve
         // console.log(resolvedFiles)
         // const _productDto = this.formatInput(createProductInput);
         const product : ProductModel = await this.productService.createProduct(createProductInput, resolvedFiles);

@@ -138,7 +138,7 @@ export class AdminService {
    */
   async updateAvatar(id: string, file: FileUpload): Promise<boolean> {
     // console.log(`File name > ${file.filename?.split('.')[0]}`);
-    const _uploadFile = await uploadFile(
+    const _uploadFile : string = await uploadFile(
       file,
       `${file.filename?.split('.')[0]}`,
       'dynasty/admin/avatar',
