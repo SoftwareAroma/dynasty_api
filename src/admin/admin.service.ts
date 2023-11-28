@@ -31,25 +31,16 @@ export class AdminService {
 
   // log in admin
   async loginAdmin(loginAdminDto: LoginAdminDto, response: Response,): Promise<string> {
-    const admin = await this.validateAdmin(loginAdminDto);
+    const admin = await this.findOne(
+      loginAdminDto.email,
+      loginAdminDto.password,
+    );
     const payload = { username: admin.email, sub: admin.id };
     const token = this.jwtService.sign(payload);
     response.cookie('access_token', token, {
       httpOnly: true,
     });
     return token;
-  }
-
-  /**
-   * Validate admin
-   * @param loginAdminDto The login dto for admin
-   * @returns AdminModel
-   */
-  async validateAdmin(loginAdminDto: LoginAdminDto): Promise<AdminModel> {
-    return await this.findOne(
-      loginAdminDto.email,
-      loginAdminDto.password,
-    );
   }
 
   // get all customers
@@ -65,6 +56,17 @@ export class AdminService {
   // get user profile
   async getProfile(id: string): Promise<AdminModel> {
     return await this.getAdminProfile(id);
+  }
+
+  async validateAdmin(id: string): Promise<AdminModel | undefined> {
+    const admin = await this.prismaService.admin.findUnique({
+      where: { id: id },
+    });
+    if (!admin) {
+      // throw an error if email already exists
+      return undefined;
+    }
+    return this.exclude(admin, ['password', 'salt']);
   }
 
   // update client profile

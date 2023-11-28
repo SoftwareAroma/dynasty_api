@@ -27,18 +27,14 @@ export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
   /// create a new product
-  @UseGuards(PoliciesGuard)
   @CheckPolicies(new CreateProductPolicyHandler())
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @UseInterceptors(FilesInterceptor('images'))
   @Post('create')
   async createProduct(
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files: Array<Express.Multer.File>,
-  ): Promise<Product | any> {
-    // console.log(`create dto - ${createProductDto.price}`);
-    // console.log(`create dto - ${files.length}`);
-
+  ): Promise<Product> {
     const _productDto = createProductDto;
     // convert price string to json object
     _productDto.price = JSON.parse(_productDto.price.toString());

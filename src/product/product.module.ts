@@ -4,9 +4,11 @@ import { ProductService } from './product.service';
 import { CaslModule } from '@casl/casl.module';
 
 @Module({
-  imports: [CaslModule],
+  imports: [
+    CaslModule
+  ],
   controllers: [ProductController],
   providers: [ProductService],
   exports: [ProductService],
 })
-export class ProductModule {}
+export class ProductModule { }
