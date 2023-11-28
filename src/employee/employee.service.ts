@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { CloudinaryService } from '@shared/cloudinary/cloudinary.service';
@@ -35,12 +35,17 @@ export class EmployeeService {
     id: string,
     file: Express.Multer.File,
   ): Promise<boolean> {
+    // check if user exist
+    await this.getOneEmployee(id);
+
     const _uploadFile = await this.cloudinaryService.uploadFile(
       file,
-      'dynasty/customer/avatar',
       `${file.originalname?.split('.')[0]}`,
+      'dynasty/employee/avatar',
+      'dynasty_employee_avatar',
     );
-    const _customer = await this.prismaService.customer.update({
+
+    const employee = await this.prismaService.employee.update({
       where: {
         id: id,
       },
@@ -48,22 +53,20 @@ export class EmployeeService {
         avatar: _uploadFile,
       },
     });
-    return !!_customer;
+    return !!employee;
   }
 
   /// delete the customer avatar
   async deleteEmployeeAvatar(id: string): Promise<boolean> {
-    const _customer = await this.prismaService.customer.findUnique({
-      where: { id: id },
-    });
-    if (_customer != null) {
-      _customer.avatar =
-        'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
-    }
+    /// check if user exist
+    await this.getOneEmployee(id);
+
+    const _avatar = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+
     const saved = await this.prismaService.customer.update({
       where: { id: id },
       data: {
-        avatar: _customer.avatar,
+        avatar: _avatar,
       },
     });
     return !!saved;
@@ -82,6 +85,9 @@ export class EmployeeService {
     id: string,
     updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<EmployeeModel> {
+    /// check if user exist
+    await this.getOneEmployee(id);
+
     return this.prismaService.employee.update({
       where: { id: id },
       data: updateEmployeeDto,
@@ -89,18 +95,17 @@ export class EmployeeService {
   }
 
   async getEmployeeById(id: string): Promise<EmployeeModel> {
-    return this.prismaService.employee.findUnique({
-      where: { id: id },
-      include: {
-        attendance: true,
-      },
-    });
+    return await this.getOneEmployee(id);
   }
 
   async deleteEmployee(id: string): Promise<boolean> {
+    /// check if user exist
+    await this.getOneEmployee(id);
+
     const _deleted = await this.prismaService.employee.delete({
       where: { id: id },
     });
+
     return !!_deleted;
   }
 
@@ -109,6 +114,9 @@ export class EmployeeService {
     id: string,
     attendanceDto: CreateAttendanceDto,
   ): Promise<EmployeeModel> {
+    /// check if user exist
+    await this.getOneEmployee(id);
+
     return this.prismaService.employee.update({
       where: { id: id },
       data: {
@@ -127,6 +135,10 @@ export class EmployeeService {
     attendanceId: string,
     updateAttendanceDto: UpdateAttendanceDto,
   ): Promise<EmployeeModel> {
+    /// check if user and attendance exist
+    await this.getOneEmployee(employeeId);
+    await this.getAttendanceById(employeeId);
+
     return this.prismaService.employee.update({
       where: { id: employeeId },
       data: {
@@ -145,23 +157,42 @@ export class EmployeeService {
 
   // get all attendance
   async getAttendance(): Promise<Array<AttendanceModel>> {
-    const _attendance = await this.prismaService.attendance.findMany({
+    return await this.prismaService.attendance.findMany({
       include: {
         employee: true,
       },
     });
-    if (_attendance == null) {
-      return undefined
-    }
-    return _attendance;
   }
 
   async getAttendanceById(id: string): Promise<AttendanceModel> {
-    return this.prismaService.attendance.findUnique({
+    if (id == null) {
+      throw new HttpException('No record found for attendance', HttpStatus.BAD_REQUEST);
+    }
+
+    const attendance = await this.prismaService.attendance.findUnique({
       where: { id: id },
       include: {
         employee: true,
       },
     });
+
+    if (!attendance) {
+      throw new HttpException("Attendance does't exist", HttpStatus.NOT_FOUND);
+    }
+
+    return attendance;
+  }
+
+  private async getOneEmployee(id: string): Promise<EmployeeModel> {
+    if (id == null) {
+      throw new HttpException('No record found for user', HttpStatus.BAD_REQUEST);
+    }
+    const _employee = await this.prismaService.employee.findUnique({
+      where: { id: id },
+    });
+    if (!_employee) {
+      throw new HttpException('No record found for user', HttpStatus.NOT_FOUND);
+    }
+    return _employee;
   }
 }
