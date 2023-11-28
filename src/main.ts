@@ -26,6 +26,8 @@ const bootstrap = async (): Promise<void> => {
   // api version
   const apiVersion: string = configService.get<string>('API_VERSION');
   const swaggerPath = 'swagger';
+
+
   // global prefix
   // app.setGlobalPrefix('api');
   // enable CORS

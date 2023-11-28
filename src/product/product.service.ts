@@ -16,23 +16,22 @@ export class ProductService {
   async createProduct(
     createProductDto: CreateProductDto,
     files: Array<Express.Multer.File>,
-  ): Promise<ProductModel | any> {
+  ): Promise<ProductModel> {
     if (files.length > 0) {
       const _images = [];
       for (const image of files) {
         // console.log("data ", files);
         const _fileUrl = await this.cloudinaryService.uploadFile(
           image,
+          `${image.filename?.split('.')[0]}`,
           'dynasty/products',
-          `${image.originalname?.split('.')[0]}`,
+          'dynasty_products'
         );
         _images.push(_fileUrl);
       }
       createProductDto.images = _images;
     }
     createProductDto.price.amount = Number(createProductDto.price.amount);
-    // console.log("Product >>>>", createProductDto.images);
-    // console.log("Product >>>>", newProduct.id);
     return this.prismaService.product.create({
       data: createProductDto,
     });

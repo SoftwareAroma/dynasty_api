@@ -27,7 +27,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           // console.log("Request Cookie Header ", request.headers.cookie);
           return request.headers.cookie;
         }
-
       },
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
@@ -35,7 +34,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
   async validate(payload: any) {
     // console.log(payload)
-    const _user = await this.customerService.getProfile(payload.sub);
+    const _user = await this.customerService.validateUser(payload.sub);
+    // console.log(_user)
     if (_user?.id != undefined) {
       return {
         _id: _user.id,
@@ -44,7 +44,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         username: _user.email,
       };
     } else {
-      const _admin = await this.adminService.getProfile(payload.sub);
+      const _admin = await this.adminService.validateAdmin(payload.sub);
       if (_admin?.id == payload.sub) {
         return {
           _id: _admin.id,

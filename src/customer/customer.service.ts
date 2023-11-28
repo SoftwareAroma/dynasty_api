@@ -31,7 +31,10 @@ export class CustomerService {
 
   // log in customer
   async loginCustomer(loginCustomerDto: LoginCustomerDto, response: Response): Promise<string> {
-    const customer = await this.validateCustomer(loginCustomerDto);
+    const customer = await this.findOne(
+      loginCustomerDto.email,
+      loginCustomerDto.password,
+    );
     const payload = { username: customer.email, sub: customer.id };
     const token = this.jwtService.sign(payload);
     response.cookie('access_token', token, {
@@ -40,26 +43,46 @@ export class CustomerService {
     return token;
   }
 
-  // validate customer
-  async validateCustomer(
-    loginCustomerDto: LoginCustomerDto,
-  ): Promise<CustomerModel> {
-    return await this.findOne(
-      loginCustomerDto.email,
-      loginCustomerDto.password,
-    );
-  }
-
   // get user profile
   async getProfile(id: string): Promise<CustomerModel> {
     return await this.getCustomerProfile(id);
+  }
+
+  // get the profile of a  customer (user)
+  async validateUser(id: string): Promise<CustomerModel | undefined> {
+    const customer = await this.prismaService.customer.findUnique({
+      where: { id: id },
+    });
+    if (!customer) {
+      // throw an error if email already exists
+      return undefined;
+    }
+    return this.exclude(customer, ['password', 'salt']);
+  }
+
+  // validate social user
+  async validateSocialUser(
+    socialId: string,
+    user: any,
+  ): Promise<CustomerModel> {
+    // check if user already exists in our db, if not create a new user
+    const _customer = await this.prismaService.customer.findFirst({
+      where: { social: socialId },
+    });
+    if (!_customer) {
+      // create a new user
+      return this.prismaService.customer.create({
+        data: user,
+      });
+    }
+    return this.exclude(_customer, ['password', 'salt']);
   }
 
   // get all customers
   async getCustomers(): Promise<CustomerModel[]> {
     const _customers = await this.prismaService.customer.findMany();
     if (_customers == null) {
-      return undefined
+      return []
     }
     _customers.forEach((_customer) =>
       this.exclude(_customer, ['password', 'salt']),
@@ -233,23 +256,6 @@ export class CustomerService {
     return this.exclude(_customer, ['password', 'salt']);
   }
 
-  // validate social user
-  async validateSocialUser(
-    socialId: string,
-    user: any,
-  ): Promise<CustomerModel> {
-    // check if user already exists in our db, if not create a new user
-    const _customer = await this.prismaService.customer.findFirst({
-      where: { social: socialId },
-    });
-    if (!_customer) {
-      // create a new user
-      return this.prismaService.customer.create({
-        data: user,
-      });
-    }
-    return this.exclude(_customer, ['password', 'salt']);
-  }
 
   // update profile
   private async updateCustomerProfile(
@@ -275,7 +281,7 @@ export class CustomerService {
     });
     if (!customer) {
       // throw an error if email already exists
-      throw new HttpException('No records found for this user', HttpStatus.NOT_FOUND);
+      throw new HttpException('No records found for this customer', HttpStatus.NOT_FOUND);
     }
     return this.exclude(customer, ['password', 'salt']);
   }
