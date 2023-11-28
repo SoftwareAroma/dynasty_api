@@ -1,3 +1,4 @@
+
 export type PriceType = {
     amount: number;
     currency: string;
@@ -8,4 +9,3 @@ export type AttendanceType = {
     closeTime: Date;
     employeeId: string;
 };
-
