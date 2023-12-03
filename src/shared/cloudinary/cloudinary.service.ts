@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as cloudinary from 'cloudinary'
 import { ConfigService } from '@nestjs/config';
 import toStream = require('buffer-to-stream');
@@ -32,25 +32,29 @@ export class CloudinaryService {
       cloudinary.UploadApiResponse | cloudinary.UploadApiErrorResponse
     > => {
       const uniqueFilename = new Date().toISOString()
-      return new Promise((resolve, reject) => {
-        const upload = cloudinary.v2.uploader.upload_stream(
-          {
-            resource_type: 'image',
-            folder: folder,
-            public_id: public_id ?? uniqueFilename,
-            tag: tag ?? 'dynasty',
-            overwrite: true,
-          },
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            } else {
-              resolve(result);
-            }
-          },
-        );
-        toStream(file.buffer).pipe(upload);
-      });
+      try {
+        return new Promise((resolve, reject) => {
+          const upload = cloudinary.v2.uploader.upload_stream(
+            {
+              resource_type: 'image',
+              folder: folder,
+              public_id: public_id ?? uniqueFilename,
+              tag: tag ?? 'dynasty',
+              overwrite: true,
+            },
+            (error, result) => {
+              if (error) {
+                return reject(error);
+              } else {
+                resolve(result);
+              }
+            },
+          );
+          toStream(file.buffer).pipe(upload);
+        });
+      } catch (e) {
+        throw new HttpException(e, HttpStatus.BAD_REQUEST);
+      }
     };
     const response = await uploadFromBuffer();
     return cloudinary.v2.url(response.secure_url);
@@ -75,25 +79,29 @@ export class CloudinaryService {
     // for each file in files, upload it with the upload method above
     const uploadFromBuffer = async (file: Express.Multer.File, public_id: string): Promise<
       cloudinary.UploadApiResponse | cloudinary.UploadApiErrorResponse> => {
-      return new Promise((resolve, reject) => {
-        const upload = cloudinary.v2.uploader.upload_stream(
-          {
-            resource_type: 'image',
-            folder: folderName,
-            public_id: public_id,
-            tag: tag ?? 'dynasty',
-            overwrite: true,
-          },
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            } else {
-              resolve(result);
-            }
-          },
-        );
-        toStream(file.buffer).pipe(upload);
-      });
+      try {
+        return new Promise((resolve, reject) => {
+          const upload = cloudinary.v2.uploader.upload_stream(
+            {
+              resource_type: 'image',
+              folder: folderName,
+              public_id: public_id,
+              tag: tag ?? 'dynasty',
+              overwrite: true,
+            },
+            (error, result) => {
+              if (error) {
+                return reject(error);
+              } else {
+                resolve(result);
+              }
+            },
+          );
+          toStream(file.buffer).pipe(upload);
+        });
+      } catch (e) {
+        throw new HttpException(e, HttpStatus.BAD_REQUEST);
+      }
     }
 
     // for each file in files, upload it with the upload method above
