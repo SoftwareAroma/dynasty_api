@@ -21,12 +21,18 @@ import {
   DeleteProductPolicyHandler,
   UpdateProductPolicyHandler,
 } from '@casl/handler/policy.handler';
+import { CreateReviewDto } from './dto/review.dto';
 
 @Controller({ path: 'product', version: '1' })
 export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
-  /// create a new product
+  /**
+   * Create a new product
+   * @param createProductDto - product data to be created
+   * @param files - list of files to be uploaded
+   * @returns Product
+   */
   @CheckPolicies(new CreateProductPolicyHandler())
   @UseGuards(JwtAuthGuard, PoliciesGuard)
   @UseInterceptors(FilesInterceptor('images'))
@@ -46,25 +52,43 @@ export class ProductController {
     return await this.productService.createProduct(_productDto, files);
   }
 
-  // get all products
+  /**
+   * Get all products
+   * @returns List<Product> - list of products
+   */
   @Get('products')
   async getProducts(): Promise<Array<Product>> {
     return await this.productService.getProducts();
   }
 
-  // get product by id
+  /**
+   * Get product by id
+   * @param id - product id
+   * @returns Product
+   */
   @Get('product/:id')
   async getProductById(@Param('id') id: string): Promise<Product> {
-    console.log(id);
+    // console.log(id);
     return await this.productService.getProductById(id);
   }
 
+  /**
+   * Get product by name
+   * @param name - product name
+   * @returns Product
+   */
   @Get('product/:name')
   async getProductByName(@Param('name') name: string): Promise<Product> {
     return await this.productService.getProductByName(name);
   }
 
-  // update product
+  /**
+   * Update the product with the given id
+   * @param updateProductDto - product data
+   * @param id - product id
+   * @param files - list of files to be uploaded
+   * @returns Product
+   */
   @UseGuards(PoliciesGuard)
   @CheckPolicies(new UpdateProductPolicyHandler())
   @UseInterceptors(FilesInterceptor('images'))
@@ -84,7 +108,12 @@ export class ProductController {
     return await this.productService.updateProduct(id, _productDto, files);
   }
 
-  // delete product image
+  /**
+   * Delete a product image
+   * @param id - product id
+   * @param image - name of image to delete
+   * @returns Product
+   */
   @UseGuards(PoliciesGuard)
   @CheckPolicies(new UpdateProductPolicyHandler())
   @UseGuards(JwtAuthGuard)
@@ -94,12 +123,60 @@ export class ProductController {
     return await this.productService.deleteProductImage(id, fileName);
   }
 
-  // delete product
+  /**
+   * Delete a product with the given id
+   * @param id - product id
+   * @returns true if the product is deleted, false otherwise
+   */
   @UseGuards(PoliciesGuard)
   @CheckPolicies(new DeleteProductPolicyHandler())
   @UseGuards(JwtAuthGuard)
   @Delete('product/:id')
   async deleteProduct(@Param('id') id: string): Promise<boolean> {
     return await this.productService.deleteProduct(id);
+  }
+
+  /**
+   * Add a new review to product
+   * @param id - product id
+   * @param reviewDto - review data
+   * @returns Product
+   */
+  @Post('product/:id/review')
+  async addReview(
+    @Param('id') id: string,
+    @Body() reviewDto: CreateReviewDto,
+  ): Promise<Product> {
+    return await this.productService.addProductReview(id, reviewDto);
+  }
+
+  /**
+   * Update the review with the given id
+   * @param id - product id
+   * @param reviewId - review id
+   * @param reviewDto - review data
+   * @returns Product
+   */
+  @Patch('product/:id/review/:reviewId')
+  async updateReview(
+    @Param('id') id: string,
+    @Param('reviewId') reviewId: string,
+    @Body() reviewDto: CreateReviewDto,
+  ): Promise<Product> {
+    return await this.productService.updateProductReview(id, reviewId, reviewDto);
+  }
+
+  /**
+   * Delete a review from product
+   * @param id - product id
+   * @param reviewId - review id
+   * @returns true if the review is deleted, false otherwise
+   */
+  @Delete('product/:id/review/:reviewId')
+  async deleteReview(
+    @Param('id') id: string,
+    @Param('reviewId') reviewId: string,
+  ): Promise<boolean> {
+    return await this.productService.deleteProductReview(id, reviewId);
   }
 }

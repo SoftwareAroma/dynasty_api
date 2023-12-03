@@ -19,7 +19,7 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      // app path
+      /// app path
       "@app/*": ["src/app/*"],
       "@app": ["src/app"],
 
@@ -32,8 +32,10 @@
       "@product": ["src/product"],
       "@employee": ["src/employee"],
       "@employee/*": ["src/employee/*"],
+      "@sales": ["src/sale"],
+      "@sales/*": ["src/sale/*"],
 
-      // shared module paths
+      /// shared module paths
       "@prisma/*": ["src/shared/prisma/*"],
       "@prisma": ["src/shared/prisma"],
       "@cloudinary": ["src/shared/cloudinary"],

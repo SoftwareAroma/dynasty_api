@@ -13,6 +13,7 @@ import * as Joi from 'joi';
 import { EmployeeModule } from '@employee/employee.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter, PrismaClientExceptionFilter } from '@shared';
+import { SaleModule } from '@sales/sale.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { HttpExceptionFilter, PrismaClientExceptionFilter } from '@shared';
     CustomerModule,
     ProductModule,
     EmployeeModule,
+    SaleModule,
 
     // prisma for database query and connection
     PrismaModule,

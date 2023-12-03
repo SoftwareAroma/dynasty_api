@@ -4,6 +4,7 @@ import { PrismaService } from '@shared/prisma/prisma.service';
 import { CreateProductDto } from '@product/dto/create.dto';
 import { CloudinaryService } from '@shared/cloudinary/cloudinary.service';
 import { UpdateProductDto } from '@product/dto/update.dto';
+import { CreateReviewDto, UpdateReviewDto } from './dto/review.dto';
 
 @Injectable()
 export class ProductService {
@@ -12,7 +13,12 @@ export class ProductService {
     private cloudinaryService: CloudinaryService,
   ) { }
 
-  // create product
+  /**
+   * Create a new product
+   * @param createProductDto - product data to be created
+   * @param files - list of files to be uploaded
+   * @returns ProductModel
+   */
   async createProduct(
     createProductDto: CreateProductDto,
     files: Array<Express.Multer.File>,
@@ -37,7 +43,10 @@ export class ProductService {
     });
   }
 
-  /// get all products
+  /**
+   * Find all products
+   * @returns List<ProductModel>[] - list of products
+   */
   async getProducts(): Promise<Array<ProductModel>> {
     const _products = await this.prismaService.product.findMany();
     if (_products == null) {
@@ -46,7 +55,11 @@ export class ProductService {
     return _products;
   }
 
-  /// get product by id
+  /**
+   * Find a product with the given id
+   * @param id - product id
+   * @returns ProductModel
+   */
   async getProductById(id: string): Promise<ProductModel> {
     return this.prismaService.product.findUnique({
       where: {
@@ -55,7 +68,11 @@ export class ProductService {
     });
   }
 
-  // get product by name
+  /**
+   * Find a product with the given name
+   * @param name - product name
+   * @returns ProductModel
+   */
   async getProductByName(name: string): Promise<ProductModel> {
     return this.prismaService.product.findFirst({
       where: {
@@ -64,7 +81,13 @@ export class ProductService {
     });
   }
 
-  /// update product
+  /**
+   * update the product with the given id
+   * @param id - product id
+   * @param updateProductDto - product data to be updated
+   * @param files - list of files to be uploaded
+   * @returns ProductModel
+   */
   async updateProduct(
     id: string,
     updateProductDto: UpdateProductDto,
@@ -89,6 +112,11 @@ export class ProductService {
     });
   }
 
+  /**
+   * Delete the product with the given id
+   * @param id - product id
+   * @returns bolean - true if the product is deleted, false otherwise
+   */
   async deleteProduct(id: string): Promise<boolean> {
     const isDeleted = await this.prismaService.product.delete({
       where: { id: id },
@@ -96,7 +124,12 @@ export class ProductService {
     return !!isDeleted;
   }
 
-  // delete the file from the database
+  /**
+   * Delete the image with the given file name from the product with the given id
+   * @param productId 
+   * @param fileName 
+   * @returns false if the image is not deleted, true otherwise
+   */
   async deleteProductImage(
     productId: string,
     fileName: string,
@@ -110,7 +143,7 @@ export class ProductService {
     }
     const isDeleted = await this.deleteImageFile(fileName);
     if (isDeleted) {
-      const images = _product.images;
+      const { images } = _product;
       /// delete the image from the product list of images
       images.splice(
         images.findIndex((image) => image == fileName),
@@ -131,7 +164,74 @@ export class ProductService {
     }
   }
 
-  /// delete image file
+  /**
+   * Create a review for the product with the given id
+   * @param productId - product id
+   * @param review - review data to be added to the product
+   * @returns ProductModel
+   */
+  async addProductReview(
+    productId: string,
+    review: CreateReviewDto,
+  ): Promise<ProductModel> {
+    return this.prismaService.product.update({
+      where: { id: productId },
+      data: {
+        reviews: {
+          create: review,
+        },
+      },
+    });
+  }
+
+  /**
+   * Update the review with the given id for the product with the given id
+   * @param productId - product id
+   * @param reviewId - review id
+   * @param review - review data to be updated
+   * @returns ProductModel
+   */
+  async updateProductReview(
+    productId: string,
+    reviewId: string,
+    review: UpdateReviewDto,
+  ): Promise<ProductModel> {
+    return this.prismaService.product.update({
+      where: { id: productId },
+      data: {
+        reviews: {
+          update: { where: { id: reviewId }, data: review },
+        },
+      },
+    });
+  }
+
+  /**
+   * Delete the review with the given id for the product with the given id
+   * @param productId - product id
+   * @param reviewId - review id
+   * @returns true if the review is deleted, false otherwise
+   */
+  async deleteProductReview(
+    productId: string,
+    reviewId: string,
+  ): Promise<boolean> {
+    const response = await this.prismaService.product.update({
+      where: { id: productId },
+      data: {
+        reviews: {
+          delete: { id: reviewId },
+        },
+      },
+    });
+    return !!response;
+  }
+
+  /**
+   * delete the image with the given file name from the cloudinary storage
+   * @param fileName - file name of the image to be deleted
+   * @returns true the response from cloudinary is 200, false otherwise
+   */
   private async deleteImageFile(fileName: string): Promise<boolean> {
     const _id = fileName?.split('/')[-1];
     const _pub_id = _id?.split('.')[0];

@@ -39,6 +39,7 @@ model Customer {
   isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
+  Review    Review[]
 }
 
 model Cart {
@@ -61,6 +62,8 @@ model Product {
   depo        String
   category    String
   cart        Cart[]
+  sales       Sale[]
+  reviews     Review[]
   brand       String?  @default("Custom")
   rating      Float?   @default(0.0)
   numReviews  Int?     @default(0)
@@ -69,6 +72,30 @@ model Product {
   sizes       String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt()
+}
+
+model Review {
+  id         String   @id @unique @default(uuid())
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customerId String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  productId  String
+  comment    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+}
+
+model Sale {
+  id         String   @id @unique @default(uuid())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employeeId String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  productId  String
+  currency   String
+  amount     Float
+  quantity   Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
 }
 
 model Employee {
@@ -80,6 +107,7 @@ model Employee {
   designation String
   avatar      String?      @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")
   attendance  Attendance[]
+  sales       Sale[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt()
 }
