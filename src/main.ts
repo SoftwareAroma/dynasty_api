@@ -19,8 +19,8 @@ const bootstrap = async (): Promise<void> => {
   });
   // app config service
   const configService = app.get(ConfigService);
-  const prismaService: PrismaService = app.get(PrismaService);
-  await prismaService.enableShutdownHooks(app);
+  app.get(PrismaService);
+  app.enableShutdownHooks();
   // string from environment file
   const origin: string = configService.get<string>('FRONTEND_URL');
   // api version
