@@ -23,6 +23,9 @@ export class EmployeeService {
   ): Promise<EmployeeModel> {
     const _employee = await this.prismaService.employee.create({
       data: employeeDto,
+      include: {
+        attendance: true,
+      }
     });
     if (file != null) {
       await this.updateEmployeeAvatar(_employee.id, file);
@@ -52,6 +55,9 @@ export class EmployeeService {
       data: {
         avatar: _uploadFile,
       },
+      include: {
+        attendance: true,
+      }
     });
     return !!employee;
   }
@@ -91,6 +97,9 @@ export class EmployeeService {
     return this.prismaService.employee.update({
       where: { id: id },
       data: updateEmployeeDto,
+        include: {
+            attendance: true,
+        },
     });
   }
 
@@ -157,7 +166,7 @@ export class EmployeeService {
 
   // get all attendance
   async getAttendance(): Promise<Array<AttendanceModel>> {
-    return await this.prismaService.attendance.findMany({
+    return this.prismaService.attendance.findMany({
       include: {
         employee: true,
       },
@@ -189,6 +198,9 @@ export class EmployeeService {
     }
     const _employee = await this.prismaService.employee.findUnique({
       where: { id: id },
+      include: {
+        attendance: true,
+      }
     });
     if (!_employee) {
       throw new HttpException('No record found for user', HttpStatus.NOT_FOUND);
