@@ -15,7 +15,7 @@ model Admin {
   lastName  String
   userName  String?
   phone     String?
-  avatar    String?  @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")
+  avatar    String?  @default("https://res.cloudinary.com/dynasty-urban-style/image/upload/v1701686160/defaults/account_afhqmj.png")
   salt      String?
   role      Role     @default(ADMIN)
   isAdmin   Boolean  @default(true)
@@ -34,12 +34,12 @@ model Customer {
   phone     String
   salt      String?
   cart      Cart[]
-  avatar    String?  @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")
+  Review    Review[]
+  avatar    String?  @default("https://res.cloudinary.com/dynasty-urban-style/image/upload/v1701686160/defaults/account_afhqmj.png")
   role      Role     @default(USER)
   isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
-  Review    Review[]
 }
 
 model Cart {
@@ -58,11 +58,10 @@ model Product {
   name        String
   description String
   price       Json
-  images      String[]
+  images      String[] @default(["https://res.cloudinary.com/dynasty-urban-style/image/upload/v1701686619/defaults/placeholder_image_resized_vf7n7a.jpg"])
   depo        String
   category    String
   cart        Cart[]
-  sales       Sale[]
   reviews     Review[]
   brand       String?  @default("Custom")
   rating      Float?   @default(0.0)
@@ -86,16 +85,15 @@ model Review {
 }
 
 model Sale {
-  id         String   @id @unique @default(uuid())
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  employeeId String
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  productId  String
-  currency   String
-  amount     Float
-  quantity   Int      @default(1)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt()
+  id         String    @id @unique @default(uuid())
+  amount     Float     @default(0.0)
+  currency   String    @default("GH₵")
+  quantity   Int       @default(0)
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  employeeId String?
+  products   String[]  @default([])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt()
 }
 
 model Employee {
@@ -105,7 +103,7 @@ model Employee {
   lastName    String
   phoneNumber String
   designation String
-  avatar      String?      @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")
+  avatar      String?      @default("https://res.cloudinary.com/dynasty-urban-style/image/upload/v1701686160/defaults/account_afhqmj.png")
   attendance  Attendance[]
   sales       Sale[]
   createdAt   DateTime     @default(now())

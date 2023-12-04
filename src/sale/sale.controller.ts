@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { SaleService } from './sale.service';
 import { CreateSaleDto } from './dto/sale.dto';
 import { Sale } from '@prisma/client';
@@ -25,7 +25,7 @@ export class SaleController {
      * Get all sales
      * @returns List<Sale>
      */
-    @Post('all')
+    @Get('sales')
     async getSales(): Promise<Array<Sale>> {
         return await this.saleService.getSales();
     }
@@ -35,7 +35,7 @@ export class SaleController {
      * @param id - sale id
      * @returns Sale
      */
-    @Post('/:id')
+    @Get('/:id')
     async getSaleById(
         @Param('id') id: string,
     ): Promise<Sale> {
@@ -47,23 +47,11 @@ export class SaleController {
      * @param employeeId - employee id
      * @returns List<Sale>
      */
-    @Post('employee/:id')
+    @Get('employee/:id')
     async getSalesByEmployeeId(
         @Param('id') employeeId: string,
     ): Promise<Array<Sale>> {
         return await this.saleService.getSalesByEmployeeId(employeeId);
-    }
-
-    /**
-     * Get sales by product id
-     * @param productId - product id
-     * @returns List<Sale>
-     */
-    @Post('product/:id')
-    async getSalesByProductId(
-        @Param('id') productId: string,
-    ): Promise<Array<Sale>> {
-        return await this.saleService.getSalesByProductId(productId);
     }
 
     /**
@@ -72,7 +60,7 @@ export class SaleController {
      * @param createSaleDto - sale data to be updated 
      * @returns Sale
      */
-    @Post('update/:id')
+    @Patch('update/:id')
     async updateSaleById(
         @Param('id') id: string,
         @Body() createSaleDto: CreateSaleDto,
@@ -85,7 +73,7 @@ export class SaleController {
      * @param id - sale id
      * @returns true if the sale was deleted
      */
-    @Post('delete/:id')
+    @Delete('delete/:id')
     async deleteSaleById(
         @Param('id') id: string,
     ): Promise<boolean> {

@@ -110,15 +110,14 @@ export class ProductController {
 
   /**
    * Delete a product image
-   * @param id - product id
-   * @param image - name of image to delete
    * @returns Product
+   * @param params
    */
   @UseGuards(PoliciesGuard)
   @CheckPolicies(new UpdateProductPolicyHandler())
   @UseGuards(JwtAuthGuard)
   @Post('product/:id/:image')
-  async deleteProductImage(@Param() params): Promise<boolean> {
+  async deleteProductImage(@Param() params: any): Promise<boolean> {
     const { id, fileName } = params;
     return await this.productService.deleteProductImage(id, fileName);
   }

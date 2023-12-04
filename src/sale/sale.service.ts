@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Sale } from '@prisma/client';
 import { PrismaService } from '@prisma/prisma.service';
-import { CreateSaleDto } from './dto/sale.dto';
+import {CreateSaleDto, UpdateSaleDto} from './dto/sale.dto';
 
 @Injectable()
 export class SaleService {
@@ -22,8 +22,11 @@ export class SaleService {
         _saleDto.amount = parseFloat(_saleDto.amount.toString());
         _saleDto.quantity = parseInt(_saleDto.quantity.toString(), 10);
 
-        return await this.prismaService.sale.create({
+        return this.prismaService.sale.create({
             data: _saleDto,
+            include: {
+                employee: true,
+            },
         });
     }
 
@@ -32,7 +35,11 @@ export class SaleService {
      * @returns List<Sale>
      */
     async getSales(): Promise<Array<Sale>> {
-        return await this.prismaService.sale.findMany();
+        return this.prismaService.sale.findMany({
+            include: {
+                employee: true,
+            },
+        });
     }
 
     /**
@@ -46,6 +53,9 @@ export class SaleService {
         }
         const _sale = await this.prismaService.sale.findUnique({
             where: { id: id },
+            include: {
+                employee: true,
+            },
         });
 
         if (!_sale) {
@@ -65,24 +75,9 @@ export class SaleService {
         }
         const _sales = await this.prismaService.sale.findMany({
             where: { employeeId: employeeId },
-        });
-        if (!_sales) {
-            throw new HttpException('Sale not found', HttpStatus.NOT_FOUND);
-        }
-        return _sales;
-    }
-
-    /**
-     * Get sales by product id
-     * @param productId - product id
-     * @returns List<Sale>
-     */
-    async getSalesByProductId(productId: string): Promise<Array<Sale>> {
-        if (!productId) {
-            throw new HttpException('Product Id required', HttpStatus.BAD_REQUEST);
-        }
-        const _sales = await this.prismaService.sale.findMany({
-            where: { productId: productId },
+            include: {
+                employee: true,
+            },
         });
         if (!_sales) {
             throw new HttpException('Sale not found', HttpStatus.NOT_FOUND);
@@ -99,7 +94,7 @@ export class SaleService {
      */
     async updateSale(
         id: string,
-        updateSaleDto: CreateSaleDto,
+        updateSaleDto: UpdateSaleDto,
     ): Promise<Sale> {
         if (!id) {
             throw new HttpException('Product Id required', HttpStatus.BAD_REQUEST);
@@ -117,9 +112,12 @@ export class SaleService {
             throw new HttpException('Sale not found', HttpStatus.NOT_FOUND);
         }
 
-        return await this.prismaService.sale.update({
-            where: { id: id },
+        return this.prismaService.sale.update({
+            where: {id: id},
             data: _saleDto,
+            include: {
+                employee: true,
+            },
         });
     }
 
