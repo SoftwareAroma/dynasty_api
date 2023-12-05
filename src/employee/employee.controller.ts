@@ -28,10 +28,10 @@ import {
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) { }
 
-  // @UseGuards(PoliciesGuard)
-  // @CheckPolicies(new CreateEmployeePolicyHandler())
-  // @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies(new CreateEmployeePolicyHandler())
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('images'))
   @Post('create')
   async createEmployee(
     @Body() createEmployeeDto: CreateEmployeeDto,
@@ -69,6 +69,13 @@ export class EmployeeController {
   @Get('attendance')
   async getAttendance(): Promise<Array<AttendanceModel>> {
     return this.employeeService.getAttendance();
+  }
+
+  @Get('attendance/employee/:id')
+  async getAttendanceByEmployeeId(
+    @Param('id') id: string,
+  ): Promise<Array<AttendanceModel>> {
+    return this.employeeService.getEmployeeAttendance(id);
   }
 
   @Get('attendance/:id')

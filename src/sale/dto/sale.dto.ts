@@ -1,30 +1,30 @@
 import { ApiProperty, PartialType } from "@nestjs/swagger";
-import {IsArray, IsNotEmpty, IsNumber, IsString} from "class-validator";
+import { IsNotEmpty, IsString } from "class-validator";
 
 export class CreateSaleDto {
     @IsString()
-    @IsNotEmpty()
     @ApiProperty()
     employeeId: string;
+
 
     @IsString()
     @IsNotEmpty()
     @ApiProperty()
     currency: string;
 
-    @IsNumber()
+    @IsString()
     @IsNotEmpty()
     @ApiProperty()
-    amount: number;
+    amount: string;
 
-    @IsNumber()
+    @IsString()
     @IsNotEmpty()
     @ApiProperty()
-    quantity: number;
+    quantity: string;
 
-    @IsArray()
+    @IsString()
     @ApiProperty()
-    products: string[]
+    products: string[];
 }
 
 export class UpdateSaleDto extends PartialType(CreateSaleDto) { }

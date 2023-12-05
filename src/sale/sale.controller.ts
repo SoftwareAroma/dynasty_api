@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { SaleService } from './sale.service';
-import { CreateSaleDto } from './dto/sale.dto';
-import { Sale } from '@prisma/client';
+import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
+import {SaleService} from './sale.service';
+import {CreateSaleDto} from './dto/sale.dto';
+import {Sale} from '@prisma/client';
 
 @Controller({ path: 'sale', version: '1' })
 export class SaleController {
@@ -17,8 +17,21 @@ export class SaleController {
     @Post('create')
     async createSale(
         @Body() createSaleDto: CreateSaleDto,
-    ): Promise<Sale> {
-        return await this.saleService.createSale(createSaleDto);
+    ): Promise<Sale | any> {
+        const _data = createSaleDto;
+        // split the products string into an array
+        const _productList = _data.products.toString().split(',');
+
+        // create a new sale dto
+        const _saleDto = new CreateSaleDto();
+        _saleDto.employeeId = _data.employeeId;
+        _saleDto.amount = _data.amount;
+        _saleDto.quantity = _data.quantity;
+        _saleDto.currency = _data.currency;
+        _saleDto.products = _productList;
+
+        // console.log(_saleDto);
+        return await this.saleService.createSale(_saleDto);
     }
 
     /**

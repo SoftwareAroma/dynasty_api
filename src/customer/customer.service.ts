@@ -179,7 +179,7 @@ export class CustomerService {
       where: { id: id },
       data: {
         avatar:
-          'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
+          'https://res.cloudinary.com/dynasty-urban-style/image/upload/v1701686160/defaults/account_afhqmj.png',
       },
     });
     return !!saved;
