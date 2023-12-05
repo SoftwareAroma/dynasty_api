@@ -67,7 +67,7 @@ export class EmployeeService {
     /// check if user exist
     await this.getOneEmployee(id);
 
-    const _avatar = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+    const _avatar = 'https://res.cloudinary.com/dynasty-urban-style/image/upload/v1701686160/defaults/account_afhqmj.png';
 
     const saved = await this.prismaService.customer.update({
       where: { id: id },
@@ -97,9 +97,9 @@ export class EmployeeService {
     return this.prismaService.employee.update({
       where: { id: id },
       data: updateEmployeeDto,
-        include: {
-            attendance: true,
-        },
+      include: {
+        attendance: true,
+      },
     });
   }
 
@@ -171,6 +171,26 @@ export class EmployeeService {
         employee: true,
       },
     });
+  }
+
+  // get all employee attendance
+  async getEmployeeAttendance(id: string): Promise<Array<AttendanceModel>> {
+    if (id == null) {
+      throw new HttpException('No record found for attendance', HttpStatus.BAD_REQUEST);
+    }
+
+    const attendance = await this.prismaService.attendance.findMany({
+      where: { employeeId: id },
+      include: {
+        employee: true,
+      },
+    });
+
+    if (!attendance) {
+      throw new HttpException("Attendance does't exist", HttpStatus.NOT_FOUND);
+    }
+
+    return attendance;
   }
 
   async getAttendanceById(id: string): Promise<AttendanceModel> {

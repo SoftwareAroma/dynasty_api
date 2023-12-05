@@ -1,7 +1,6 @@
 import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PriceType } from '@shared';
-import {Sale} from "@prisma/client";
 
 export class CreateProductDto {
   @IsString()
@@ -62,8 +61,4 @@ export class CreateProductDto {
   @IsNotEmpty()
   @ApiProperty()
   sizes: string[];
-
-  @IsOptional()
-  @ApiProperty()
-  sale?: Sale;
 }

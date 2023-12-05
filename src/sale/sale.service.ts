@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Sale } from '@prisma/client';
 import { PrismaService } from '@prisma/prisma.service';
-import {CreateSaleDto, UpdateSaleDto} from './dto/sale.dto';
+import { CreateSaleDto, UpdateSaleDto } from './dto/sale.dto';
 
 @Injectable()
 export class SaleService {
@@ -17,13 +17,8 @@ export class SaleService {
     async createSale(
         createSaleDto: CreateSaleDto,
     ): Promise<Sale> {
-        const _saleDto = createSaleDto;
-        // make sure the amount is a floating point number and the quantity is an integer
-        _saleDto.amount = parseFloat(_saleDto.amount.toString());
-        _saleDto.quantity = parseInt(_saleDto.quantity.toString(), 10);
-
         return this.prismaService.sale.create({
-            data: _saleDto,
+            data: createSaleDto,
             include: {
                 employee: true,
             },
@@ -99,10 +94,6 @@ export class SaleService {
         if (!id) {
             throw new HttpException('Product Id required', HttpStatus.BAD_REQUEST);
         }
-        const _saleDto = updateSaleDto;
-        // make sure the amount is a floating point number and the quantity is an integer
-        _saleDto.amount = parseFloat(_saleDto.amount.toString());
-        _saleDto.quantity = parseInt(_saleDto.quantity.toString(), 10);
 
         const _sale = await this.prismaService.sale.findUnique({
             where: { id: id },
@@ -113,8 +104,8 @@ export class SaleService {
         }
 
         return this.prismaService.sale.update({
-            where: {id: id},
-            data: _saleDto,
+            where: { id: id },
+            data: updateSaleDto,
             include: {
                 employee: true,
             },

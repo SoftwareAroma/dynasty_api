@@ -86,9 +86,9 @@ model Review {
 
 model Sale {
   id         String    @id @unique @default(uuid())
-  amount     Float     @default(0.0)
+  amount     String    @default("0.0")
   currency   String    @default("GH₵")
-  quantity   Int       @default(0)
+  quantity   String    @default("0")
   employee   Employee? @relation(fields: [employeeId], references: [id])
   employeeId String?
   products   String[]  @default([])
